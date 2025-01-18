@@ -73,6 +73,7 @@ jobs:
         with:
           context: ./sharelatex
           file: sharelatex/Dockerfile
+          load: true
           push: true
           platforms: ${{ matrix.platform }}
           labels: ${{ steps.meta.outputs.labels }}
