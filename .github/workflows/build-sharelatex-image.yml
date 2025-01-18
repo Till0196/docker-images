@@ -64,7 +64,7 @@ jobs:
             --build-arg BUILDKIT_INLINE_CACHE=1 \
             --progress=plain \
             --file overleaf/server-ce/Dockerfile \
-            --tag sharelatex/sharelatex:latest \
+            --tag sharelatex:latest \
             overleaf
       
       - name: Build and push
