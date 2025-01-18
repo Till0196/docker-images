@@ -52,20 +52,35 @@ jobs:
       - name: sharelatex base image build (arm64 only)
         if: ${{ matrix.platform == 'linux/arm64' }}
         run: |
-          git clone https://github.com/overleaf/overleaf --depth 1 --recursive
-          docker build \
-            --build-arg BUILDKIT_INLINE_CACHE=1 \
-            --progress=plain \
-            --file overleaf/server-ce/Dockerfile-base \
-            --pull \
-            --tag sharelatex/sharelatex-base:latest \
-            overleaf
-          docker build \
-            --build-arg BUILDKIT_INLINE_CACHE=1 \
-            --progress=plain \
-            --file overleaf/server-ce/Dockerfile \
-            --tag sharelatex:latest \
-            overleaf
+          git clone https://github.com/overleaf/overleaf --depth 1 --recursive sharelatex/overleaf
+
+      - name: sharelatex-base Build and push (arm64 only)
+        if: ${{ matrix.platform == 'linux/arm64' }}
+        uses: docker/build-push-action@v5
+        with:
+          context: ./sharelatex/overleaf
+          file: sharelatex/overleaf/server-ce/Dockerfile-base
+          push: true
+          platforms: ${{ matrix.platform }}
+          labels: ${{ steps.meta.outputs.labels }}
+          outputs: type=image,name=${{ env.REGISTRY_IMAGE }}-base,name-canonical=true,push=true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: sharelatex Build and push (arm64 only)
+        if: ${{ matrix.platform == 'linux/arm64' }}
+        uses: docker/build-push-action@v5
+        with:
+          context: ./sharelatex/overleaf
+          file: sharelatex/overleaf/server-ce/Dockerfile
+          build-args: |
+            OVERLEAF_BASE_TAG=${{ env.REGISTRY_IMAGE }}-base:latest
+          push: true
+          platforms: ${{ matrix.platform }}
+          labels: ${{ steps.meta.outputs.labels }}
+          outputs: type=image,name=${{ env.REGISTRY_IMAGE }}-arm64,name-canonical=true,push=true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
       
       - name: Build and push
         id: build
@@ -73,7 +88,6 @@ jobs:
         with:
           context: ./sharelatex
           file: sharelatex/Dockerfile
-          load: true
           push: true
           platforms: ${{ matrix.platform }}
           labels: ${{ steps.meta.outputs.labels }}

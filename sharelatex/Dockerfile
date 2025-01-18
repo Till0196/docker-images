@@ -4,7 +4,7 @@ ARG TARGETARCH
 FROM sharelatex/sharelatex:5 AS base-amd64
 
 # arm64の場合、DockerHubにarm64向けイメージが存在しないため事前にビルドしたベースイメージを利用
-FROM sharelatex:latest AS base-arm64
+FROM ghcr.io/till0196/sharelatex-arm64:latest AS base-arm64
 
 # アーキテクチャに応じてベースイメージを選択
 FROM base-${TARGETARCH}
