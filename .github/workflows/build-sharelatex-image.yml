@@ -49,6 +49,24 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
+      - name: sharelatex base image build (arm64 only)
+        if: ${{ matrix.platform == 'linux/arm64' }}
+        run: |
+          git clone https://github.com/overleaf/overleaf --depth 1
+          docker build \
+            --build-arg BUILDKIT_INLINE_CACHE=1 \
+            --progress=plain \
+            --file Dockerfile-base \
+            --pull \
+            --tag sharelatex/sharelatex-base:latest \
+            overleaf/server-ce
+          docker build \
+            --build-arg BUILDKIT_INLINE_CACHE=1 \
+            --progress=plain \
+            --file Dockerfile \
+            --tag sharelatex/sharelatex:latest \
+            overleaf/server-ce
+      
       - name: Build and push
         id: build
         uses: docker/build-push-action@v5

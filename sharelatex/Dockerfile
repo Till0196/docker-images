@@ -1,5 +1,13 @@
-FROM sharelatex/sharelatex:5
+ARG TARGETARCH
 
+# x86_64の場合、DockerHubからベースイメージを利用
+FROM sharelatex/sharelatex:5 AS base-amd64
+
+# arm64の場合、DockerHubにarm64向けイメージが存在しないため事前にビルドしたベースイメージを利用
+FROM sharelatex/sharelatex:latest AS base-arm64
+
+# アーキテクチャに応じてベースイメージを選択
+FROM base-${TARGETARCH}
 
 COPY --from=registry.gitlab.com/islandoftex/images/texlive:latest /usr/local/texlive /usr/local/texlive
 
