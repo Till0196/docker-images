@@ -59,13 +59,13 @@ jobs:
             --file overleaf/server-ce/Dockerfile-base \
             --pull \
             --tag sharelatex/sharelatex-base:latest \
-            overleaf/server-ce
+            overleaf
           docker build \
             --build-arg BUILDKIT_INLINE_CACHE=1 \
             --progress=plain \
             --file overleaf/server-ce/Dockerfile \
             --tag sharelatex/sharelatex:latest \
-            overleaf/server-ce
+            overleaf
       
       - name: Build and push
         id: build
