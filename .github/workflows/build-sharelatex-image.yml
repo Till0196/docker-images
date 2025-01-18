@@ -56,14 +56,14 @@ jobs:
           docker build \
             --build-arg BUILDKIT_INLINE_CACHE=1 \
             --progress=plain \
-            --file Dockerfile-base \
+            --file overleaf/server-ce/Dockerfile-base \
             --pull \
             --tag sharelatex/sharelatex-base:latest \
             overleaf/server-ce
           docker build \
             --build-arg BUILDKIT_INLINE_CACHE=1 \
             --progress=plain \
-            --file Dockerfile \
+            --file overleaf/server-ce/Dockerfile \
             --tag sharelatex/sharelatex:latest \
             overleaf/server-ce
       
