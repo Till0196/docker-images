@@ -1,7 +1,7 @@
 FROM hexpm/elixir:1.16.1-erlang-26.2.2-alpine-3.19.1 AS otp
 ARG MIX_ENV="prod"
 ARG TMPDIR="/tmp/akkoma"
-ARG BUILD_TAG="v3.14.1"
+ARG BUILD_TAG="v3.15.2"
 ARG PLEROMA_BUILD_BRANCH=${BUILD_TAG}
 # install dependencies
 RUN apk add git gcc g++ musl-dev make cmake file-dev rclone wget zip imagemagick
