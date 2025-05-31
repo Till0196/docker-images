@@ -8,6 +8,13 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV RUST_LOG=debug
 ENV GST_PLUGIN_PATH=/usr/local/lib/gstreamer-1.0
 
+# ActionsでビルドするとAPTのfetchで403が出るので、リトライ設定を追加
+# /etc/apt/apt.conf.d/99retries というファイルを作成してリトライ設定を記述
+RUN echo 'APT::Acquire::Retries "3";' > /etc/apt/apt.conf.d/99retries
+RUN echo 'APT::Acquire::http::Timeout "30";' >> /etc/apt/apt.conf.d/99retries # タイムアウトも少し長めに設定
+RUN echo 'Acquire::Queue-Mode "host";' >> /etc/apt/apt.conf.d/99retries # 1ホストあたりの同時接続数を制限
+RUN echo 'Acquire::Max-FutureTime "30";' >> /etc/apt/apt.conf.d/99retries # Clock Skew対策
+
 # 基本パッケージとGStreamer開発ライブラリをインストール
 RUN apt-get update && apt-get install -y \
     build-essential \
