@@ -56,9 +56,7 @@ RUN curl -L "https://gitlab.freedesktop.org/gstreamer/gst-plugins-rs/-/archive/$
 # cargo-cを使用してgst-plugins-rs全体をビルド・インストール
 RUN --mount=type=cache,target=/usr/local/cargo/registry,sharing=locked \
     --mount=type=cache,target=/build/target,sharing=locked \
-    cargo cbuild --prefix=/usr/local --libdir=lib
-RUN --mount=type=cache,target=/usr/local/cargo/registry,sharing=locked \
-    --mount=type=cache,target=/build/target,sharing=locked \
+    cargo cbuild --prefix=/usr/local --libdir=lib && \
     cargo cinstall --prefix=/usr/local --libdir=lib
 
 # プラグインが正しくインストールされているか確認
