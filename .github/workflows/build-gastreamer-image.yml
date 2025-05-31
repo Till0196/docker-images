@@ -71,6 +71,23 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
+      - name: Cache
+        uses: actions/cache@v4
+        id: cache
+        with:
+          path: |
+            usr-local-cargo-registry
+          key: ${{ env.IMAGE_NAME }}-cargo-cache-${{ env.PLATFORM_PAIR }}-${{ hashFiles(format('{0}/Dockerfile', env.TARGET_DIR)) }}
+
+      - name: inject cache into docker
+        uses: reproducible-containers/buildkit-cache-dance@v3.2.0
+        with:
+          cache-map: |
+            {
+              "usr-local-cargo-registry": "/usr/local/cargo/registry"
+            }
+          skip-extraction: ${{ steps.cache.outputs.cache-hit }}
+
       - name: Build and push by digest
         id: build
         uses: docker/build-push-action@v6

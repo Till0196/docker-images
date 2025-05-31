@@ -55,8 +55,10 @@ RUN curl -L "https://gitlab.freedesktop.org/gstreamer/gst-plugins-rs/-/archive/$
 WORKDIR /build/gst-plugins-rs-${GST_PLUGINS_RS_VERSION}
 
 # cargo-cを使用してgst-plugins-rs全体をビルド・インストール
-RUN cargo cbuild --prefix=/usr/local --libdir=lib
-RUN cargo cinstall --prefix=/usr/local --libdir=lib
+RUN --mount=type=cache,target=/usr/local/cargo/registry,sharing=locked \
+    cargo cbuild --prefix=/usr/local --libdir=lib
+RUN --mount=type=cache,target=/usr/local/cargo/registry,sharing=locked \
+    cargo cinstall --prefix=/usr/local --libdir=lib
 
 # プラグインが正しくインストールされているか確認
 RUN ldconfig && \
@@ -96,6 +98,9 @@ ENV GST_PLUGIN_PATH=/usr/local/lib/gstreamer-1.0
 # 実行時必要なパッケージのみインストール
 RUN apt-get update && apt-get install -y \
     gstreamer1.0-tools \
+    gstreamer1.0-alsa \
+    gstreamer1.0-libav \
+    gstreamer1.0-rtsp \
     gstreamer1.0-plugins-base \
     gstreamer1.0-plugins-good \
     gstreamer1.0-plugins-bad \
@@ -103,6 +108,7 @@ RUN apt-get update && apt-get install -y \
     libgstreamer1.0-0 \
     libgstreamer-plugins-base1.0-0 \
     libgstreamer-plugins-bad1.0-0 \
+    libnice-dev \
     alsa-utils \
     v4l-utils \
     curl \
