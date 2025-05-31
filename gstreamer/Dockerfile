@@ -55,8 +55,8 @@ RUN curl -L "https://gitlab.freedesktop.org/gstreamer/gst-plugins-rs/-/archive/$
 WORKDIR /build/gst-plugins-rs-${GST_PLUGINS_RS_VERSION}
 
 # cargo-cを使用してgst-plugins-rs全体をビルド・インストール
-RUN cargo cbuild --prefix=/usr/local
-RUN cargo cinstall --prefix=/usr/local
+RUN cargo cbuild --prefix=/usr/local --libdir=lib
+RUN cargo cinstall --prefix=/usr/local --libdir=lib
 
 # プラグインが正しくインストールされているか確認
 RUN ldconfig && \

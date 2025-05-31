@@ -28,6 +28,18 @@ jobs:
             platform: linux/arm64
     runs-on: ${{ matrix.os }}
     steps:
+      - uses: easimon/maximize-build-space@master
+        with:
+          root-reserve-mb: 8192
+          swap-size-mb: 1024
+          temp-reserve-mb: 1024
+          build-mount-path: "/var/lib/docker"
+          remove-dotnet: true
+          remove-android: true
+          remove-haskell: true
+          remove-codeql: true
+          remove-docker-images: true
+
       - name: Prepare
         run: |
           platform=${{ matrix.platform }}
