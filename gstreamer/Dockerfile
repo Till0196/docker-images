@@ -108,8 +108,8 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # ビルドステージからプラグインをコピー
-COPY --from=0 /usr/local/lib/gstreamer-1.0/ /usr/local/lib/gstreamer-1.0/
-COPY --from=0 /usr/local/lib/libgst*.so* /usr/local/lib/
+COPY --from=build /usr/local/lib/gstreamer-1.0/ /usr/local/lib/gstreamer-1.0/
+COPY --from=build /usr/local/lib/libgst*.so* /usr/local/lib/
 
 # ライブラリキャッシュを更新
 RUN ldconfig
