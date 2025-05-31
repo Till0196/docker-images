@@ -8,13 +8,6 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV RUST_LOG=debug
 ENV GST_PLUGIN_PATH=/usr/local/lib/gstreamer-1.0
 
-# ActionsでビルドするとAPTのfetchで403が出るので、リトライ設定を追加
-# /etc/apt/apt.conf.d/99retries というファイルを作成してリトライ設定を記述
-RUN echo 'APT::Acquire::Retries "3";' > /etc/apt/apt.conf.d/99retries
-RUN echo 'APT::Acquire::http::Timeout "30";' >> /etc/apt/apt.conf.d/99retries # タイムアウトも少し長めに設定
-RUN echo 'Acquire::Queue-Mode "host";' >> /etc/apt/apt.conf.d/99retries # 1ホストあたりの同時接続数を制限
-RUN echo 'Acquire::Max-FutureTime "30";' >> /etc/apt/apt.conf.d/99retries # Clock Skew対策
-
 # 基本パッケージとGStreamer開発ライブラリをインストール
 RUN apt-get update && apt-get install -y \
     build-essential \
@@ -66,14 +59,22 @@ RUN cargo cbuild --prefix=/usr/local
 RUN cargo cinstall --prefix=/usr/local
 
 # プラグインが正しくインストールされているか確認
-RUN ldconfig
-
-# インストールされたgst-plugins-rsプラグインを動的に確認
-RUN echo "=== インストールされたgst-plugins-rsプラグイン ===" && \
-    gst-inspect-1.0 --print-all | grep -E "^(file|sodium|threadshare|aws|s3|hlssink3|ndi|onvif|quinn|raptorq|reqwest|rtp|webrtc|webrtchttp|audiofx|claxon|csound|lewton|spotify|cdg|closedcaption|dav1d|ffv1|gif|gtk4|hsv|png|rav1e|videofx|webp|flavors|fmp4|mp4|ahead|json|regex|wrap|fallback|livesync|togglerecord|tracers|uriplaylistbin)" | head -30
+RUN ldconfig && \
+    echo "=== インストールされたライブラリファイル ===" && \
+    find /usr/local/lib -name "libgst*.so" -o -name "*.so" | sort && \
+    echo "=== GStreamerプラグインパス ===" && \
+    echo "GST_PLUGIN_PATH: $GST_PLUGIN_PATH" && \
+    ls -la /usr/local/lib/gstreamer-1.0/ || echo "ディレクトリが存在しません" && \
+    echo "=== インストールされた全プラグイン ===" && \
+    gst-inspect-1.0 --print-all | grep "Plugin Details:" -A 5 | grep -E "(Name|Filename)" | head -20 && \
+    echo "=== Rustプラグイン確認 ===" && \
+    gst-inspect-1.0 --print-all | grep -B2 -A5 "gst-plugins-rs" || echo "Rustプラグインが見つかりません" && \
+    echo "=== cargo-c インストール確認 ===" && \
+    find /usr/local -name "*gst*" -type f | head -20
 
 # 主要なエレメントの確認
-RUN echo "=== 主要なエレメント確認 ===" && \
+RUN ldconfig && \
+    echo "=== 主要なエレメント確認 ===" && \
     for element in webrtcsink webrtcsrc whipclientsink whipserversrc s3sink s3src hlssink3 awstranscriber mp4mux fmp4mux dav1ddec rav1eenc fallbacksrc fallbackswitch livesync; do \
         if gst-inspect-1.0 $element >/dev/null 2>&1; then \
             echo "✓ $element: OK"; \
