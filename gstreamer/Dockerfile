@@ -9,7 +9,7 @@ ENV RUST_LOG=debug
 ENV GST_PLUGIN_PATH=/usr/local/lib/gstreamer-1.0
 
 # 基本パッケージとGStreamer開発ライブラリをインストール
-RUN apt-get update && && apt-get -y dist-upgrade -y && apt-get install -y \
+RUN apt-get update && && apt-get dist-upgrade -y && apt-get install -y \
     build-essential \
     pkg-config \
     curl \
@@ -97,7 +97,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV GST_PLUGIN_PATH=/usr/local/lib/gstreamer-1.0
 
 # 実行時必要なパッケージのみインストール
-RUN apt-get update && && apt-get -y dist-upgrade -y && apt-get install -y \
+RUN apt-get update && && apt-get dist-upgrade -y && apt-get install -y \
     gstreamer1.0-tools \
     gstreamer1.0-alsa \
     gstreamer1.0-libav \
