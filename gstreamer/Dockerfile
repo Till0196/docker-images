@@ -9,7 +9,7 @@ ENV RUST_LOG=debug
 ENV GST_PLUGIN_PATH=/usr/local/lib/gstreamer-1.0
 
 # 基本パッケージとGStreamer開発ライブラリをインストール
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && && apt-get -y dist-upgrade -y && apt-get install -y \
     build-essential \
     pkg-config \
     curl \
@@ -51,13 +51,14 @@ RUN cargo install cargo-c
 
 # gst-plugins-rsをtar.gzでダウンロードして展開
 WORKDIR /build
-RUN curl -L "https://gitlab.freedesktop.org/gstreamer/gst-plugins-rs/-/archive/${GST_PLUGINS_RS_VERSION}/gst-plugins-rs-${GST_PLUGINS_RS_VERSION}.tar.gz" | tar -xz
-WORKDIR /build/gst-plugins-rs-${GST_PLUGINS_RS_VERSION}
+RUN curl -L "https://gitlab.freedesktop.org/gstreamer/gst-plugins-rs/-/archive/${GST_PLUGINS_RS_VERSION}/gst-plugins-rs-${GST_PLUGINS_RS_VERSION}.tar.gz" | tar -xz --strip-components=1
 
 # cargo-cを使用してgst-plugins-rs全体をビルド・インストール
 RUN --mount=type=cache,target=/usr/local/cargo/registry,sharing=locked \
+    --mount=type=cache,target=/build/target,sharing=locked \
     cargo cbuild --prefix=/usr/local --libdir=lib
 RUN --mount=type=cache,target=/usr/local/cargo/registry,sharing=locked \
+    --mount=type=cache,target=/build/target,sharing=locked \
     cargo cinstall --prefix=/usr/local --libdir=lib
 
 # プラグインが正しくインストールされているか確認
@@ -96,7 +97,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV GST_PLUGIN_PATH=/usr/local/lib/gstreamer-1.0
 
 # 実行時必要なパッケージのみインストール
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && && apt-get -y dist-upgrade -y && apt-get install -y \
     gstreamer1.0-tools \
     gstreamer1.0-alsa \
     gstreamer1.0-libav \
