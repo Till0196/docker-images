@@ -31,7 +31,16 @@ RUN apt-get update && apt-get install -y \
     gstreamer1.0-plugins-ugly \
     alsa-utils \
     v4l-utils \
+    libcairo2-dev \
+    libpango1.0-dev \
+    libgdk-pixbuf2.0-dev \
+    libgtk-4-dev \
+    libwebp-dev \
+    libclang-dev \
     && rm -rf /var/lib/apt/lists/*
+
+# NDI SDKをインストール
+RUN curl -fsSL https://raw.githubusercontent.com/DistroAV/DistroAV/refs/heads/master/CI/libndi-get.sh | bash
 
 # Rustをインストール
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
