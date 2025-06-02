@@ -77,13 +77,18 @@ jobs:
         id: cache
         with:
           path: |
-            /var/cache-target
+            var-cache-cargo
+            var-cache-sccache
           key: ${{ env.IMAGE_NAME }}-cargo-cache-${{ env.PLATFORM_PAIR }}
 
       - name: inject cache into docker
         uses: reproducible-containers/buildkit-cache-dance@v3.2.0
         with:
-          dockerfile: ${{ env.TARGET_DIR }}/Dockerfile
+          cache-map: |
+            {
+              "var-cache-cargo": "/var/cache/cargo",
+              "var-cache-sccache": "/var/cache/sccache"
+            }
           builder: ${{ steps.setup-buildx.outputs.name }}
           skip-extraction: ${{ steps.cache.outputs.cache-hit }}
 
