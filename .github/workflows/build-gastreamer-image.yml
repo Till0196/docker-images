@@ -63,6 +63,7 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+        id: setup-buildx
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
@@ -76,18 +77,14 @@ jobs:
         id: cache
         with:
           path: |
-            var-cache-cargo
-            var-cache-sccache
+            /var/cache-target
           key: ${{ env.IMAGE_NAME }}-cargo-cache-${{ env.PLATFORM_PAIR }}
 
       - name: inject cache into docker
         uses: reproducible-containers/buildkit-cache-dance@v3.2.0
         with:
-          cache-map: |
-            {
-              "var-cache-cargo": "/var/cache/cargo",
-              "var-cache-sccache": "/var/cache/sccache"
-            }
+          dockerfile: ${{ env.TARGET_DIR }}/Dockerfile
+          builder: ${{ steps.setup-buildx.outputs.name }}
           skip-extraction: ${{ steps.cache.outputs.cache-hit }}
 
       - name: Build and push by digest

@@ -62,7 +62,7 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 # sccacheをインストール
 RUN cd /tmp && \
     curl -sSL $(curl -s https://api.github.com/repos/mozilla/sccache/releases/tags/v${SCCACHE_VERSION} | \
-    jq -r '.assets[] | select(.name | contains("'${SCCACHE_ARCH}'") and endswith(".tar.gz") and (endswith(".sha256") | not)) | .browser_download_url') \
+    jq -r '.assets[] | select(.name | contains("'${SCCACHE_ARCH}'") and endswith(".tar.gz") and (endswith(".sha256") | not) and (contains("dist") | not)) | .browser_download_url') \
     -o sccache-v${SCCACHE_VERSION}-${SCCACHE_ARCH}.tar.gz && \
     tar -zxvf sccache-v${SCCACHE_VERSION}-${SCCACHE_ARCH}.tar.gz && \
     install sccache-v${SCCACHE_VERSION}-${SCCACHE_ARCH}/sccache /usr/local/bin && \
@@ -73,8 +73,8 @@ ENV RUSTC_WRAPPER=/usr/local/bin/sccache
 ENV SCCACHE_DIR=/var/cache/sccache
 
 # cargo-cをインストール
-RUN --mount=type=cache,target=/var/cache/cargo \
-    --mount=type=cache,target=/var/cache/sccache \
+RUN --mount=type=cache,target=/var/cache/cargo,sharing=locked \
+    --mount=type=cache,target=/var/cache/sccache,sharing=locked \
     cargo install cargo-c
 
 # gst-plugins-rsをtar.gzでダウンロードして展開
@@ -82,8 +82,8 @@ WORKDIR /build
 RUN curl -L "https://gitlab.freedesktop.org/gstreamer/gst-plugins-rs/-/archive/${GST_PLUGINS_RS_VERSION}/gst-plugins-rs-${GST_PLUGINS_RS_VERSION}.tar.gz" | tar -xz --strip-components=1
 
 # cargo-cを使用してgst-plugins-rs全体をビルド・インストール
-RUN --mount=type=cache,target=/var/cache/cargo \
-    --mount=type=cache,target=/var/cache/sccache \
+RUN --mount=type=cache,target=/var/cache/cargo,sharing=locked \
+    --mount=type=cache,target=/var/cache/sccache,sharing=locked \
     cargo fetch --locked && \
     cargo cbuild --prefix=/usr/local --libdir=lib && \
     cargo cinstall --prefix=/usr/local --libdir=lib
