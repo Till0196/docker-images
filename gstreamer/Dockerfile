@@ -1,7 +1,19 @@
-FROM ubuntu:noble AS build
+FROM ubuntu:noble AS base
+ARG TARGETARCH
+
+FROM base AS build-arm64
+ARG SCCACHE_ARCH=aarch64-unknown-linux-musl
+
+FROM base AS build-amd64
+ARG SCCACHE_ARCH=x86_64-unknown-linux-musl
+
+FROM build-${TARGETARCH} AS build
 
 # GStreamer プラグインのバージョン
 ARG GST_PLUGINS_RS_VERSION="0.13.6"
+
+# sccacheのバージョン
+ARG SCCACHE_VERSION="0.10.0"
 
 # 環境変数設定
 ENV DEBIAN_FRONTEND=noninteractive
@@ -12,6 +24,7 @@ ENV GST_PLUGIN_PATH=/usr/local/lib/gstreamer-1.0
 RUN apt-get update && apt-get dist-upgrade -y && apt-get install -y \
     build-essential \
     pkg-config \
+    jq \
     curl \
     git \
     cmake \
@@ -46,16 +59,32 @@ RUN curl -fsSL https://raw.githubusercontent.com/DistroAV/DistroAV/refs/heads/ma
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
 
+# sccacheをインストール
+RUN cd /tmp && \
+    curl -sSL $(curl -s https://api.github.com/repos/mozilla/sccache/releases/tags/v${SCCACHE_VERSION} | \
+    jq -r '.assets[] | select(.name | contains("'${SCCACHE_ARCH}'") and endswith(".tar.gz") and (endswith(".sha256") | not)) | .browser_download_url') \
+    -o sccache-v${SCCACHE_VERSION}-${SCCACHE_ARCH}.tar.gz && \
+    tar -zxvf sccache-v${SCCACHE_VERSION}-${SCCACHE_ARCH}.tar.gz && \
+    install sccache-v${SCCACHE_VERSION}-${SCCACHE_ARCH}/sccache /usr/local/bin && \
+    rm -rf /tmp/sccache*
+
+ENV CARGO_HOME=/var/cache/cargo
+ENV RUSTC_WRAPPER=/usr/local/bin/sccache
+ENV SCCACHE_DIR=/var/cache/sccache
+
 # cargo-cをインストール
-RUN cargo install cargo-c
+RUN --mount=type=cache,target=/var/cache/cargo \
+    --mount=type=cache,target=/var/cache/sccache \
+    cargo install cargo-c
 
 # gst-plugins-rsをtar.gzでダウンロードして展開
 WORKDIR /build
 RUN curl -L "https://gitlab.freedesktop.org/gstreamer/gst-plugins-rs/-/archive/${GST_PLUGINS_RS_VERSION}/gst-plugins-rs-${GST_PLUGINS_RS_VERSION}.tar.gz" | tar -xz --strip-components=1
 
 # cargo-cを使用してgst-plugins-rs全体をビルド・インストール
-RUN --mount=type=cache,target=/usr/local/cargo/registry,sharing=locked \
-    --mount=type=cache,target=/build/target,sharing=locked \
+RUN --mount=type=cache,target=/var/cache/cargo \
+    --mount=type=cache,target=/var/cache/sccache \
+    cargo fetch --locked && \
     cargo cbuild --prefix=/usr/local --libdir=lib && \
     cargo cinstall --prefix=/usr/local --libdir=lib
 
