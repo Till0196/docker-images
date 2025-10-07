@@ -10,7 +10,7 @@ ARG SCCACHE_ARCH=x86_64-unknown-linux-musl
 FROM build-${TARGETARCH} AS build
 
 # GStreamer プラグインのバージョン
-ARG GST_PLUGINS_RS_VERSION="0.13.6"
+ARG GST_PLUGINS_RS_VERSION="0.14.2"
 
 # sccacheのバージョン
 ARG SCCACHE_VERSION="0.10.0"
