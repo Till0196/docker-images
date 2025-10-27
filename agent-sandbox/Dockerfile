@@ -35,7 +35,7 @@ RUN apt-get update && \
         unzip gnupg2 \
         gh \
         iptables ipset iproute2 dnsutils aggregate \
-        jq nano vim curl wget ca-certificates tzdata
+        jq nano vim curl wget ca-certificates locales tzdata
 
 RUN locale-gen ${LANG} && \
     update-locale LANG=${LANG} LANGUAGE=${LANGUAGE} LC_ALL=${LC_ALL}
