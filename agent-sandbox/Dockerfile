@@ -28,15 +28,14 @@ RUN groupmod -n ${USERNAME} $(getent group 1000 | cut -d: -f1) && \
     usermod -l ${USERNAME} -d /home/${USERNAME} -m $(getent passwd 1000 | cut -d: -f1)
 
 # Install basic development tools and iptables/ipset
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
         libatomic1 \
         less git procps sudo zsh man-db fzf \
         unzip gnupg2 \
         gh \
         iptables ipset iproute2 dnsutils aggregate \
-        jq nano vim curl wget ca-certificates tzdata && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+        jq nano vim curl wget ca-certificates tzdata
 
 # Persist bash history.
 RUN mkdir /commandhistory && \
@@ -55,8 +54,8 @@ RUN cd /tmp && \
         echo "Unsupported architecture: $TARGETARCH"; exit 1; \
     fi && \
     curl -sSL $(curl -s https://api.github.com/repos/dandavison/delta/releases/tags/${GIT_DELTA_VERSION} | \
-    jq -r '.assets[] | select(.name | contains("'${GIT_DELTA_ARCH}'") and endswith(".deb")) | .browser_download_url') \
-    -o git-delta_${GIT_DELTA_VERSION}_${GIT_DELTA_ARCH}.deb && \
+        jq -r '.assets[] | select(.name | contains("'${GIT_DELTA_ARCH}'") and endswith(".deb")) | .browser_download_url' | head -n 1) \
+        -o git-delta_${GIT_DELTA_VERSION}_${GIT_DELTA_ARCH}.deb && \
     dpkg -i git-delta_${GIT_DELTA_VERSION}_${GIT_DELTA_ARCH}.deb && \
     rm git-delta_${GIT_DELTA_VERSION}_${GIT_DELTA_ARCH}.deb
 
@@ -75,6 +74,13 @@ RUN echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${USERNAME}-nopas
 RUN mkdir -p /workspace /usr/local/share/npm-global && \
     chown -R ${USERNAME}:${USERNAME} /workspace \
         /usr/local/share/npm-global
+
+# Set up fzf key bindings and completion scripts
+RUN FZF_VER=$(fzf --version | awk '{print $1}').0 && \
+    wget https://raw.githubusercontent.com/junegunn/fzf/${FZF_VER}/shell/key-bindings.bash \
+        -O /usr/share/doc/fzf/examples/key-bindings.bash && \
+    wget https://raw.githubusercontent.com/junegunn/fzf/${FZF_VER}/shell/completion.bash \
+        -O /usr/share/doc/fzf/examples/completion.bash
 
 WORKDIR /workspace
 
@@ -103,3 +109,6 @@ RUN npm install -g \
     @github/copilot && \
     curl https://cursor.com/install -fsS | bash
 
+# Clean up apt cache to reduce image size
+RUN apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
