@@ -34,8 +34,7 @@ RUN apt-get update && apt-get install -y \
         unzip gnupg2 \
         gh \
         iptables ipset iproute2 dnsutils aggregate \
-        jq nano vim curl wget ca-certificates tzdata \
-        gosu && \
+        jq nano vim curl wget ca-certificates tzdata && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -65,8 +64,8 @@ RUN cd /tmp && \
 RUN curl -LsSf https://astral.sh/uv/install.sh | UV_INSTALL_DIR="/usr/local/bin/" INSTALLER_NO_MODIFY_PATH=1 sh
 
 # Copy and setup entrypoint script
-COPY entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+COPY user-migration.sh /usr/local/bin/user-migration.sh
+RUN chmod +x /usr/local/bin/user-migration.sh
 
 # passless sudo for the non-root user
 RUN echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${USERNAME}-nopasswd && \
@@ -104,5 +103,3 @@ RUN npm install -g \
     @github/copilot && \
     curl https://cursor.com/install -fsS | bash
 
-# Set entrypoint and default command
-ENTRYPOINT ["sudo", "/usr/local/bin/entrypoint.sh"]
