@@ -13,12 +13,26 @@ if [ "$TARGET_USERNAME" != "$BUILD_USERNAME" ]; then
     usermod -l "$TARGET_USERNAME" -d "/home/$TARGET_USERNAME" "$BUILD_USERNAME"
 
     if [ -d "/home/$BUILD_USERNAME" ]; then
-        mv "/home/$BUILD_USERNAME" "/home/$TARGET_USERNAME"
+        echo "Moving home directory contents..."
+        mv -v "/home/$BUILD_USERNAME" "/home/$TARGET_USERNAME"
     fi
 
     if [ -f "/home/$TARGET_USERNAME/.zshrc" ]; then
         sed -i "s|/home/$BUILD_USERNAME/|/home/$TARGET_USERNAME/|g" "/home/$TARGET_USERNAME/.zshrc"
         sed -i "s|$BUILD_USERNAME|$TARGET_USERNAME|g" "/home/$TARGET_USERNAME/.zshrc"
+    fi
+
+    if [ -d "/home/$TARGET_USERNAME/.local/bin" ]; then
+        for link in /home/$TARGET_USERNAME/.local/bin/*; do
+            if [ -L "$link" ]; then
+                target=$(readlink "$link")
+                if [[ "$target" == *"/home/$BUILD_USERNAME/"* ]]; then
+                    new_target="${target//\/home\/$BUILD_USERNAME\//\/home\/$TARGET_USERNAME\/}"
+                    ln -sfn "$new_target" "$link"
+                    echo "Updated symlink: $link -> $new_target"
+                fi
+            fi
+        done
     fi
 
     chown -R "$TARGET_USERNAME":"$TARGET_USERNAME" \
