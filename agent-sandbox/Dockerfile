@@ -35,7 +35,9 @@ RUN apt-get update && \
         unzip gnupg2 \
         gh \
         iptables ipset iproute2 dnsutils aggregate \
-        jq nano vim curl wget ca-certificates locales tzdata
+        jq nano vim curl wget ca-certificates locales tzdata && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN locale-gen ${LANG} && \
     update-locale LANG=${LANG} LANGUAGE=${LANGUAGE} LC_ALL=${LC_ALL}
@@ -111,7 +113,3 @@ RUN npm install -g \
     @openai/codex \
     @github/copilot && \
     curl https://cursor.com/install -fsS | bash
-
-# Clean up apt cache to reduce image size
-RUN apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
