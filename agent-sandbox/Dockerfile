@@ -37,6 +37,9 @@ RUN apt-get update && \
         iptables ipset iproute2 dnsutils aggregate \
         jq nano vim curl wget ca-certificates tzdata
 
+RUN locale-gen ${LANG} && \
+    update-locale LANG=${LANG} LANGUAGE=${LANGUAGE} LC_ALL=${LC_ALL}
+
 # Persist bash history.
 RUN mkdir /commandhistory && \
     touch /commandhistory/.bash_history && \
@@ -76,7 +79,7 @@ RUN mkdir -p /workspace /usr/local/share/npm-global && \
         /usr/local/share/npm-global
 
 # Set up fzf key bindings and completion scripts
-RUN FZF_VER=$(fzf --version | awk '{print $1}').0 && \
+RUN FZF_VER=$(fzf --version | awk '{print $1}') && \
     wget https://raw.githubusercontent.com/junegunn/fzf/${FZF_VER}/shell/key-bindings.bash \
         -O /usr/share/doc/fzf/examples/key-bindings.bash && \
     wget https://raw.githubusercontent.com/junegunn/fzf/${FZF_VER}/shell/completion.bash \
