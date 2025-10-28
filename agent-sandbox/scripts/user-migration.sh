@@ -20,6 +20,9 @@ if [ "$TARGET_USERNAME" != "$BUILD_USERNAME" ]; then
     if [ -f "/home/$TARGET_USERNAME/.zshrc" ]; then
         sed -i "s|/home/$BUILD_USERNAME/|/home/$TARGET_USERNAME/|g" "/home/$TARGET_USERNAME/.zshrc"
         sed -i "s|$BUILD_USERNAME|$TARGET_USERNAME|g" "/home/$TARGET_USERNAME/.zshrc"
+        sed -i "s|export LANG=.*|export LANG='${LANG}'|g" "/home/$TARGET_USERNAME/.zshrc"
+        sed -i "s|export LANGUAGE=.*|export LANGUAGE='${LANGUAGE}'|g" "/home/$TARGET_USERNAME/.zshrc"
+        sed -i "s|export LC_ALL=.*|export LC_ALL='${LC_ALL}'|g" "/home/$TARGET_USERNAME/.zshrc"
     fi
 
     if [ -d "/home/$TARGET_USERNAME/.local/bin" ]; then
@@ -35,10 +38,11 @@ if [ "$TARGET_USERNAME" != "$BUILD_USERNAME" ]; then
         done
     fi
 
-    chown -R "$TARGET_USERNAME":"$TARGET_USERNAME" \
+    chown -vR "$TARGET_USERNAME":"$TARGET_USERNAME" \
         "/home/$TARGET_USERNAME" \
         /usr/local/share/npm-global \
-        /commandhistory
+        /commandhistory \
+        /configs
 
     echo "${TARGET_USERNAME} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${TARGET_USERNAME}-nopasswd && \
     chmod 0440 /etc/sudoers.d/${TARGET_USERNAME}-nopasswd
