@@ -117,4 +117,8 @@ RUN npm install -g \
     @google/gemini-cli \
     @openai/codex \
     @github/copilot && \
+    npm cache clean --force && \
     curl https://cursor.com/install -fsS | bash
+
+ENV CLAUDE_CONFIG_DIR=/configs/claude
+ENV GEMINI_CLI_SYSTEM_SETTINGS_PATH=/configs/gemini-system/settings.json
