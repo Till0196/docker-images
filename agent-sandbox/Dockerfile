@@ -42,10 +42,14 @@ RUN apt-get update && \
 RUN locale-gen ${LANG} && \
     update-locale LANG=${LANG} LANGUAGE=${LANGUAGE} LC_ALL=${LC_ALL}
 
-# Persist bash history.
-RUN mkdir /commandhistory && \
+# Persist directory.
+RUN mkdir \
+        /commandhistory \
+        /configs && \
     touch /commandhistory/.bash_history && \
-    chown -R ${USERNAME}:${USERNAME} /commandhistory
+    chown -R ${USERNAME}:${USERNAME} \
+        /commandhistory \
+        /configs
 
 # Install Git Delta
 ARG GIT_DELTA_VERSION=0.18.2
@@ -67,9 +71,10 @@ RUN cd /tmp && \
 # Install uv
 RUN curl -LsSf https://astral.sh/uv/install.sh | UV_INSTALL_DIR="/usr/local/bin/" INSTALLER_NO_MODIFY_PATH=1 sh
 
-# Copy and setup entrypoint script
-COPY user-migration.sh /usr/local/bin/user-migration.sh
-RUN chmod +x /usr/local/bin/user-migration.sh
+# Copy scripts and set permissions
+COPY ./scripts/user-migration.sh /usr/local/bin/user-migration.sh
+COPY ./scripts/setup-links.sh /usr/local/bin/setup-links.sh
+RUN chmod +x /usr/local/bin/user-migration.sh /usr/local/bin/setup-links.sh
 
 # passless sudo for the non-root user
 RUN echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${USERNAME}-nopasswd && \
