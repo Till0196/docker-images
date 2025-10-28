@@ -1,5 +1,5 @@
 ARG TARGETARCH
-FROM --platform=linux/${TARGETARCH} node:24 AS node
+FROM --platform=linux/${TARGETARCH} node:24-slim AS node
 FROM --platform=linux/${TARGETARCH} ubuntu:noble AS base
 
 ARG TZ
@@ -63,7 +63,7 @@ RUN cd /tmp && \
         echo "Unsupported architecture: $TARGETARCH"; exit 1; \
     fi && \
     curl -sSL $(curl -s https://api.github.com/repos/dandavison/delta/releases/tags/${GIT_DELTA_VERSION} | \
-        jq -r '.assets[] | select(.name | contains("'${GIT_DELTA_ARCH}'") and endswith(".deb")) | .browser_download_url' | head -n 1) \
+            jq -r '.assets[] | select(.name | contains("'${GIT_DELTA_ARCH}'") and endswith(".deb")) | .browser_download_url' | head -n 1) \
         -o git-delta_${GIT_DELTA_VERSION}_${GIT_DELTA_ARCH}.deb && \
     dpkg -i git-delta_${GIT_DELTA_VERSION}_${GIT_DELTA_ARCH}.deb && \
     rm git-delta_${GIT_DELTA_VERSION}_${GIT_DELTA_ARCH}.deb
@@ -111,14 +111,32 @@ RUN sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/
   -a "export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhistory/.bash_history" \
   -x
 
-# Install AI CLIs
+# Install AI CLIs via npm
 RUN npm install -g \
     @anthropic-ai/claude-code \
     @google/gemini-cli \
-    @openai/codex \
     @github/copilot && \
     npm cache clean --force && \
-    curl https://cursor.com/install -fsS | bash
+    rm -rf /tmp/*
+
+# Install Codex CLI
+RUN cd /tmp && \
+    if [ "$TARGETARCH" = "arm64" ]; then \
+        export CODEX_ARCH="aarch64"; \
+    elif [ "$TARGETARCH" = "amd64" ]; then \
+        export CODEX_ARCH="x86_64"; \
+    else \
+        echo "Unsupported architecture: $TARGETARCH"; exit 1; \
+    fi && \
+    curl -sSL $(curl -s https://api.github.com/repos/openai/codex/releases/latest | \
+            jq -r '.assets[] | select(.name | contains("'${CODEX_ARCH}'") and endswith("unknown-linux-musl.tar.gz") and (contains("codex-responses-api-proxy") | not)) | .browser_download_url') \
+        -o codex-${CODEX_ARCH}-unknown-linux-musl.tar.gz && \
+    sudo tar -zxvf codex-${CODEX_ARCH}-unknown-linux-musl.tar.gz -C /usr/local/bin && \
+    sudo mv /usr/local/bin/codex-${CODEX_ARCH}-unknown-linux-musl /usr/local/bin/codex && \
+    rm codex-${CODEX_ARCH}-unknown-linux-musl.tar.gz
+
+# Install Cursor-agent
+RUN curl https://cursor.com/install -fsS | bash
 
 ENV CLAUDE_CONFIG_DIR=/configs/claude
 ENV GEMINI_CLI_SYSTEM_SETTINGS_PATH=/configs/gemini-system/settings.json
