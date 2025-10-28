@@ -17,14 +17,12 @@ create_config_link() {
 
 # for claude
 create_config_link /configs/claude ~/.claude
-export CLAUDE_CONFIG_DIR=${CLAUDE_CONFIG_DIR:-"/configs/claude"}
 
 # for codex
 create_config_link /configs/codex ~/.codex
 
 # for gemini
 create_config_link /configs/gemini ~/.gemini
-export GEMINI_CLI_SYSTEM_SETTINGS_PATH=${GEMINI_CLI_SYSTEM_SETTINGS_PATH:-"/configs/gemini-system/settings.json"}
 
 # for copilot
 create_config_link /configs/copilot ~/.copilot
