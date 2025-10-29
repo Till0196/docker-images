@@ -82,7 +82,8 @@ RUN echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${USERNAME}-nopas
 
 # Create workspace and set permissions
 RUN mkdir -p /workspace /usr/local/share/npm-global && \
-    chown -R ${USERNAME}:${USERNAME} /workspace \
+    chown -R ${USERNAME}:${USERNAME} \
+        /workspace \
         /usr/local/share/npm-global
 
 # Set up fzf key bindings and completion scripts
