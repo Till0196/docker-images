@@ -6,7 +6,7 @@ on:
   push:
     paths:
       - 'agent-sandbox/Dockerfile'
-      - 'agent-sandbox/entrypoint.sh'
+      - 'agent-sandbox/scripts/**'
 
 permissions:
   contents: read
