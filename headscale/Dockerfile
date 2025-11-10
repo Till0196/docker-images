@@ -1,4 +1,4 @@
-FROM golang:1.24-bookworm AS source
+FROM golang:1.25-bookworm AS source
 ADD https://github.com/juanfont/headscale/tarball/main /tmp/headscale.tar.gz
 RUN mkdir -p /app && \
     tar -xzf /tmp/headscale.tar.gz -C /app --strip-components=1 && \
