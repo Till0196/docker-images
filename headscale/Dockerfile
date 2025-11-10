@@ -7,5 +7,8 @@ RUN mkdir -p /app && \
     CGO_ENABLED=0 go build -o headscale ./cmd/headscale
 
 FROM debian:bookworm-slim AS release
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 COPY --from=source --chmod=0755 /app/headscale /usr/local/bin/headscale
 ENTRYPOINT [ "/usr/local/bin/headscale" ]
