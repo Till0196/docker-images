@@ -43,7 +43,7 @@ ENV ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT=1
 ENV ImageOS=ubuntu24
 
 ARG TARGETARCH
-ARG GITHUB_CLI_VERSION
+ARG GITHUB_CLI_VERSION=2.86.0
 
 # 'gpg-agent' and 'software-properties-common' are needed for the 'add-apt-repository' command that follows
 RUN apt update -y \
