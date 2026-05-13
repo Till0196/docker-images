@@ -1,0 +1,68 @@
+{
+	auto_https off
+	admin off
+}
+
+{$CADDY_LISTEN::8080} {
+	encode zstd gzip
+
+	@websocket header Connection *Upgrade*
+	reverse_proxy @websocket {$AKKOMA_UPSTREAM:127.0.0.1:4000}
+
+	@service_worker path /sw.js
+	header @service_worker Cache-Control "public, max-age=0"
+
+	@frontend_assets path /packs/*
+	header @frontend_assets Cache-Control "public, max-age=31536000, immutable"
+
+	@manifest path /manifest.webmanifest
+	header @manifest Cache-Control "public, max-age=0, must-revalidate"
+
+	@instance_options {
+		method OPTIONS
+		path /instance*
+	}
+	handle @instance_options {
+		header Access-Control-Allow-Origin "*"
+		respond 204
+	}
+
+	handle /instance* {
+		header Access-Control-Allow-Origin "*"
+		root * {$AKKOMA_FRONTEND_ROOT:/akkoma/static/frontends/soapbox/main}
+		file_server
+	}
+
+	handle /packs/* {
+		root * {$AKKOMA_FRONTEND_ROOT:/akkoma/static/frontends/soapbox/main}
+		file_server
+	}
+
+	handle /sw.js {
+		root * {$AKKOMA_FRONTEND_ROOT:/akkoma/static/frontends/soapbox/main}
+		file_server
+	}
+
+	handle /manifest.webmanifest {
+		root * {$AKKOMA_FRONTEND_ROOT:/akkoma/static/frontends/soapbox/main}
+		file_server
+	}
+
+	handle /favicon.ico {
+		root * {$AKKOMA_STATIC_DIR:/akkoma/static}
+		try_files /favicon.ico /favicon.png
+		file_server
+	}
+
+	handle /favicon.png {
+		root * {$AKKOMA_STATIC_DIR:/akkoma/static}
+		file_server
+	}
+
+	handle /logo.svg {
+		root * {$AKKOMA_STATIC_DIR:/akkoma/static}
+		file_server
+	}
+
+	reverse_proxy {$AKKOMA_UPSTREAM:127.0.0.1:4000}
+}
