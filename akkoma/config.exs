@@ -23,6 +23,32 @@ env_list = fn name, default ->
   end
 end
 
+oauth_consumer_strategies =
+  "OAUTH_CONSUMER_STRATEGIES"
+  |> System.get_env()
+  |> to_string()
+  |> String.split()
+  |> Enum.map(&hd(String.split(&1, ":")))
+
+ueberauth_providers =
+  for strategy <- oauth_consumer_strategies do
+    if strategy == "oidc" do
+      {:oidc,
+       {Ueberauth.Strategy.Oidcc,
+        [
+          issuer: :oidc_issuer,
+          scopes: env_list.("OIDC_SCOPES", ["openid", "profile", "email"]),
+          userinfo: env_bool.("OIDC_USERINFO", true),
+          validate_scopes: env_bool.("OIDC_VALIDATE_SCOPES", false),
+          uid_field: env.("OIDC_UID_FIELD", "email")
+        ]}}
+    else
+      strategy_module_name = "Elixir.Ueberauth.Strategy.#{String.capitalize(strategy)}"
+      strategy_module = String.to_atom(strategy_module_name)
+      {String.to_atom(strategy), {strategy_module, [callback_params: ["state"]]}}
+    end
+  end
+
 domain = env.("INSTANCE_DOMAIN", "akkoma.example.com")
 static_dir = env.("AKKOMA_STATIC_DIR", "/akkoma/static")
 uploads_dir = env.("AKKOMA_UPLOADS_DIR", "/akkoma/uploads")
@@ -79,6 +105,27 @@ config :joken, default_signer: System.fetch_env!("JOKEN_DEFAULT_SIGNER")
 
 config :pleroma,
   configurable_from_database: env_bool.("AKKOMA_CONFIGURABLE_FROM_DATABASE", false)
+
+config :pleroma, :auth, oauth_consumer_strategies: oauth_consumer_strategies
+
+config :ueberauth, Ueberauth,
+  base_path: "/oauth",
+  providers: ueberauth_providers
+
+if "oidc" in oauth_consumer_strategies do
+  config :ueberauth_oidcc, :issuers, [
+    %{
+      name: :oidc_issuer,
+      issuer: System.get_env("OIDC_ISSUER")
+    }
+  ]
+
+  config :ueberauth_oidcc, :providers,
+    oidc: [
+      client_id: System.get_env("OIDC_CLIENT_ID"),
+      client_secret: System.get_env("OIDC_CLIENT_SECRET")
+    ]
+end
 
 config :pleroma, Pleroma.Uploaders.Local, uploads: uploads_dir
 

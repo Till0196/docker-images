@@ -3,6 +3,7 @@ ARG MIX_ENV="prod"
 ARG TMPDIR="/tmp/akkoma"
 ARG BUILD_TAG="v3.19.0"
 ARG PLEROMA_BUILD_BRANCH=${BUILD_TAG}
+ARG OAUTH_CONSUMER_STRATEGIES="oidc:ueberauth_oidcc"
 # install dependencies
 RUN apk add --no-cache git gcc g++ musl-dev make cmake file-dev rclone wget zip imagemagick
 # get source
