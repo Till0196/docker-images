@@ -142,7 +142,7 @@ if env.("AKKOMA_UPLOAD_BACKEND", "s3") == "s3" do
   config :pleroma, Pleroma.Uploaders.S3,
     bucket: System.fetch_env!("S3_BUCKET"),
     bucket_namespace: System.get_env("S3_BUCKET_NAMESPACE"),
-    truncated_namespace: nil,
+    truncated_namespace: "",
     streaming_enabled: env_bool.("S3_STREAMING_ENABLED", true)
 
   config :ex_aws, :s3,
