@@ -56,7 +56,7 @@ jobs:
 
       - name: sharelatex-base Build and push (arm64 only)
         if: ${{ matrix.platform == 'linux/arm64' }}
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7
         with:
           context: ./sharelatex/overleaf
           file: sharelatex/overleaf/server-ce/Dockerfile-base
@@ -69,7 +69,7 @@ jobs:
 
       - name: sharelatex Build and push (arm64 only)
         if: ${{ matrix.platform == 'linux/arm64' }}
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7
         with:
           context: ./sharelatex/overleaf
           file: sharelatex/overleaf/server-ce/Dockerfile
@@ -84,7 +84,7 @@ jobs:
       
       - name: Build and push
         id: build
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7
         with:
           context: ./sharelatex
           file: sharelatex/Dockerfile
