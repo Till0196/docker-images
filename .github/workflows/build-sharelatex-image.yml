@@ -64,8 +64,8 @@ jobs:
           platforms: ${{ matrix.platform }}
           labels: ${{ steps.meta.outputs.labels }}
           outputs: type=image,name=${{ env.REGISTRY_IMAGE }}-base,name-canonical=true,push=true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=sharelatex-base-${{ env.PLATFORM_PAIR }}
+          cache-to: type=gha,mode=max,scope=sharelatex-base-${{ env.PLATFORM_PAIR }}
 
       - name: sharelatex Build and push (arm64 only)
         if: ${{ matrix.platform == 'linux/arm64' }}
@@ -79,8 +79,8 @@ jobs:
           platforms: ${{ matrix.platform }}
           labels: ${{ steps.meta.outputs.labels }}
           outputs: type=image,name=${{ env.REGISTRY_IMAGE }}-arm64,name-canonical=true,push=true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=sharelatex-upstream-${{ env.PLATFORM_PAIR }}
+          cache-to: type=gha,mode=max,scope=sharelatex-upstream-${{ env.PLATFORM_PAIR }}
       
       - name: Build and push
         id: build
@@ -92,8 +92,8 @@ jobs:
           platforms: ${{ matrix.platform }}
           labels: ${{ steps.meta.outputs.labels }}
           outputs: type=image,name=${{ env.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=sharelatex-${{ env.PLATFORM_PAIR }}
+          cache-to: type=gha,mode=max,scope=sharelatex-${{ env.PLATFORM_PAIR }}
 
       - name: Export digest
         run: |
