@@ -1,0 +1,150 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "hostRules": [
+    {
+      "matchHost": "akkoma.dev",
+      "hostType": "gitea"
+    }
+  ],
+  "regexManagers": [
+    {
+      "description": "gh-runner: GitHub Actions Runner",
+      "fileMatch": ["^gh-runner/Dockerfile$"],
+      "matchStrings": [
+        "ARG RUNNER_VERSION=(?<currentValue>[\\d\\.]+)"
+      ],
+      "depNameTemplate": "actions/runner",
+      "datasourceTemplate": "github-releases",
+      "versioningTemplate": "semver"
+    },
+    {
+      "description": "gh-runner: GitHub Actions Runner Container Hooks",
+      "fileMatch": ["^gh-runner/Dockerfile$"],
+      "matchStrings": [
+        "ARG RUNNER_CONTAINER_HOOKS_VERSION=(?<currentValue>[\\d\\.]+)"
+      ],
+      "depNameTemplate": "actions/runner-container-hooks",
+      "datasourceTemplate": "github-releases",
+      "versioningTemplate": "semver"
+    },
+    {
+      "description": "gh-runner: Docker Engine",
+      "fileMatch": ["^gh-runner/Dockerfile$"],
+      "matchStrings": [
+        "ARG DOCKER_VERSION=(?<currentValue>[\\d\\.]+)"
+      ],
+      "depNameTemplate": "moby/moby",
+      "datasourceTemplate": "github-releases",
+      "versioningTemplate": "semver"
+    },
+    {
+      "description": "gh-runner: Docker Buildx",
+      "fileMatch": ["^gh-runner/Dockerfile$"],
+      "matchStrings": [
+        "ARG BUILDX_VERSION=(?<currentValue>[\\d\\.]+)"
+      ],
+      "depNameTemplate": "docker/buildx",
+      "datasourceTemplate": "github-releases",
+      "versioningTemplate": "semver"
+    },
+    {
+      "description": "gh-runner: GitHub CLI",
+      "fileMatch": ["^gh-runner/Dockerfile$"],
+      "matchStrings": [
+        "ARG GITHUB_CLI_VERSION=(?<currentValue>[\\d\\.]+)"
+      ],
+      "depNameTemplate": "cli/cli",
+      "datasourceTemplate": "github-releases",
+      "versioningTemplate": "semver"
+    },
+    {
+      "description": "agent-sandbox: git-delta",
+      "fileMatch": ["^agent-sandbox/Dockerfile$"],
+      "matchStrings": [
+        "ARG GIT_DELTA_VERSION=(?<currentValue>[\\d\\.]+)"
+      ],
+      "depNameTemplate": "dandavison/delta",
+      "datasourceTemplate": "github-releases",
+      "versioningTemplate": "semver"
+    },
+    {
+      "description": "agent-sandbox: zsh-in-docker (Powerline10k theme)",
+      "fileMatch": ["^agent-sandbox/Dockerfile$"],
+      "matchStrings": [
+        "ARG POWERLINE10K_VERSION=(?<currentValue>[\\d\\.]+)"
+      ],
+      "depNameTemplate": "deluan/zsh-in-docker",
+      "datasourceTemplate": "github-releases",
+      "versioningTemplate": "semver"
+    },
+    {
+      "description": "gstreamer: gst-plugins-rs (GitLab freedesktop)",
+      "fileMatch": ["^gstreamer/Dockerfile$"],
+      "matchStrings": [
+        "ARG GST_PLUGINS_RS_VERSION=\"(?<currentValue>[\\d\\.]+)\""
+      ],
+      "depNameTemplate": "gstreamer/gst-plugins-rs",
+      "datasourceTemplate": "gitlab-releases",
+      "registryUrlTemplate": "https://gitlab.freedesktop.org",
+      "versioningTemplate": "semver"
+    },
+    {
+      "description": "gstreamer: sccache",
+      "fileMatch": ["^gstreamer/Dockerfile$"],
+      "matchStrings": [
+        "ARG SCCACHE_VERSION=\"(?<currentValue>[\\d\\.]+)\""
+      ],
+      "depNameTemplate": "mozilla/sccache",
+      "datasourceTemplate": "github-releases",
+      "versioningTemplate": "semver"
+    },
+    {
+      "description": "akkoma: Akkoma server (akkoma.dev/Gitea)",
+      "fileMatch": ["^akkoma/Dockerfile$"],
+      "matchStrings": [
+        "ARG BUILD_TAG=\"(?<currentValue>v[\\d\\.]+)\""
+      ],
+      "depNameTemplate": "AkkomaGang/akkoma",
+      "datasourceTemplate": "gitea-releases",
+      "registryUrlTemplate": "https://akkoma.dev",
+      "versioningTemplate": "semver"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "gh-runner関連のバージョン更新をグループ化",
+      "matchFileNames": ["gh-runner/Dockerfile"],
+      "matchDepNames": [
+        "actions/runner",
+        "actions/runner-container-hooks",
+        "moby/moby",
+        "docker/buildx",
+        "cli/cli"
+      ],
+      "groupName": "gh-runner dependencies"
+    },
+    {
+      "description": "agent-sandbox関連のバージョン更新をグループ化",
+      "matchFileNames": ["agent-sandbox/Dockerfile"],
+      "matchDepNames": [
+        "dandavison/delta",
+        "deluan/zsh-in-docker"
+      ],
+      "groupName": "agent-sandbox dependencies"
+    },
+    {
+      "description": "gstreamer関連のバージョン更新をグループ化",
+      "matchFileNames": ["gstreamer/Dockerfile"],
+      "groupName": "gstreamer dependencies"
+    },
+    {
+      "description": "Dockerベースイメージのメジャーバージョン更新は慎重に",
+      "matchDatasources": ["docker"],
+      "matchUpdateTypes": ["major"],
+      "automerge": false
+    }
+  ]
+}
