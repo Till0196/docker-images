@@ -64,5 +64,11 @@
 		file_server
 	}
 
-	reverse_proxy {$AKKOMA_UPSTREAM:127.0.0.1:4000}
+	handle /media/* {
+		reverse_proxy {$AKKOMA_UPSTREAM:127.0.0.1:4000}
+	}
+
+	reverse_proxy {$AKKOMA_UPSTREAM:127.0.0.1:4000} {
+		header_down Content-Security-Policy "upgrade-insecure-requests; default-src 'none'; script-src 'self' 'wasm-unsafe-eval' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; font-src 'self'; base-uri 'self'; manifest-src 'self'; connect-src 'self' blob: https: wss:; img-src 'self' data: blob: https:; media-src 'self' https:; frame-src 'self' https:; frame-ancestors 'none';"
+	}
 }
