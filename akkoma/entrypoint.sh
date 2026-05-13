@@ -62,6 +62,19 @@ seed_static() {
 	done
 }
 
+remove_static_fallback_index() {
+	if [ ! -f "$AKKOMA_STATIC_DIR/index.html" ]; then
+		return
+	fi
+
+	if [ ! -f "$AKKOMA_FRONTEND_ROOT/index.html" ]; then
+		return
+	fi
+
+	echo "-- Removing static fallback index.html so $AKKOMA_FRONTEND_NAME/$AKKOMA_FRONTEND_REF can serve / --"
+	rm "$AKKOMA_STATIC_DIR/index.html"
+}
+
 start_akkoma() {
 	echo "-- Starting Akkoma!"
 	"$AKKOMADIR/bin/pleroma" start
@@ -98,6 +111,7 @@ secure_config_path() {
 }
 
 seed_static
+remove_static_fallback_index
 
 if [ ! -f "$AKKOMA_CONFIG_PATH" ] && [ "$AKKOMA_GENERATE_CONFIG" = "true" ]; then
 	echo "-- Generating instance configuration --"
