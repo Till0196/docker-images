@@ -1,4 +1,4 @@
-FROM ubuntu:noble AS base
+FROM ubuntu:resolute AS base
 ARG TARGETARCH
 
 FROM base AS build-arm64
@@ -118,7 +118,7 @@ WORKDIR /
 RUN rm -rf /build
 
 # 実行時に必要なパッケージのみ残す軽量版を作成（マルチステージビルド）
-FROM ubuntu:noble AS runtime
+FROM ubuntu:resolute AS runtime
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV GST_PLUGIN_PATH=/usr/local/lib/gstreamer-1.0
