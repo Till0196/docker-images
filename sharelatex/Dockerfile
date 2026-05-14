@@ -1,7 +1,7 @@
 ARG TARGETARCH
 
 # x86_64の場合、DockerHubからベースイメージを利用
-FROM sharelatex/sharelatex:5 AS base-amd64
+FROM sharelatex/sharelatex:6 AS base-amd64
 
 # arm64の場合、DockerHubにarm64向けイメージが存在しないため事前にビルドしたベースイメージを利用
 FROM ghcr.io/till0196/sharelatex-arm64:latest AS base-arm64
