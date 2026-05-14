@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-noble AS build
+FROM mcr.microsoft.com/dotnet/runtime-deps:10.0-noble AS build
 
 ARG TARGETOS
 ARG TARGETARCH
