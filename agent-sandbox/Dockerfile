@@ -1,6 +1,6 @@
 ARG TARGETARCH
 FROM --platform=linux/${TARGETARCH} node:24-slim AS node
-FROM --platform=linux/${TARGETARCH} ubuntu:noble AS base
+FROM --platform=linux/${TARGETARCH} ubuntu:resolute AS base
 
 ARG TZ
 ARG LANG
