@@ -13,7 +13,7 @@ FROM build-${TARGETARCH} AS build
 ARG GST_PLUGINS_RS_VERSION="0.14.2"
 
 # sccacheのバージョン
-ARG SCCACHE_VERSION="0.10.0"
+ARG SCCACHE_VERSION="0.15.0"
 
 # 環境変数設定
 ENV DEBIAN_FRONTEND=noninteractive
