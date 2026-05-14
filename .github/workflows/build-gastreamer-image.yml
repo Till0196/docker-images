@@ -83,7 +83,7 @@ jobs:
           key: ${{ env.IMAGE_NAME }}-cargo-cache-${{ env.PLATFORM_PAIR }}
 
       - name: inject cache into docker
-        uses: reproducible-containers/buildkit-cache-dance@v3.2.0
+        uses: reproducible-containers/buildkit-cache-dance@v3.4.0
         with:
           cache-map: |
             {
