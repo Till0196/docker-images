@@ -5,7 +5,7 @@ ARG TARGETARCH
 ARG RUNNER_VERSION=2.334.0
 ARG RUNNER_CONTAINER_HOOKS_VERSION=0.8.1
 ARG DOCKER_VERSION=29.1.5
-ARG BUILDX_VERSION=0.34.0
+ARG BUILDX_VERSION=0.34.1
 
 RUN apt update -y && apt install curl unzip -y
 
@@ -43,7 +43,7 @@ ENV ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT=1
 ENV ImageOS=ubuntu24
 
 ARG TARGETARCH
-ARG GITHUB_CLI_VERSION=2.92.0
+ARG GITHUB_CLI_VERSION=2.93.0
 
 # 'gpg-agent' and 'software-properties-common' are needed for the 'add-apt-repository' command that follows
 RUN apt update -y \
