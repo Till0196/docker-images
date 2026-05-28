@@ -17,7 +17,7 @@
       "customType": "regex",
       "description": "Update ARG <name>=<image>:<tag> in Dockerfiles annotated with a `# renovate:` comment",
       "managerFilePatterns": [
-        "/(^|/)Dockerfile$/"
+        "**/Dockerfile"
       ],
       "matchStrings": [
         "#\\s*renovate:\\s*datasource=(?<datasource>\\S+)\\s+depName=(?<depName>\\S+)(\\s+versioning=(?<versioning>\\S+))?\\s*\\nARG\\s+\\S+=\\S+:(?<currentValue>\\S+)"
@@ -28,7 +28,7 @@
       "customType": "regex",
       "description": "Update ARG <name>=\"<version>\" in Dockerfiles annotated with a `# renovate:` comment",
       "managerFilePatterns": [
-        "/(^|/)Dockerfile$/"
+        "**/Dockerfile"
       ],
       "matchStrings": [
         "#\\s*renovate:\\s*datasource=(?<datasource>(?!git-refs\\b)\\S+)\\s+depName=(?<depName>\\S+)(\\s+versioning=(?<versioning>\\S+))?\\s*\\nARG\\s+\\S+=\"?(?<currentValue>[^\":\\s]+)\"?"
@@ -39,7 +39,7 @@
       "customType": "regex",
       "description": "Update ARG <name>=\"<sha>\" via git-refs (branch HEAD digest)",
       "managerFilePatterns": [
-        "/(^|/)Dockerfile$/"
+        "**/Dockerfile"
       ],
       "matchStrings": [
         "#\\s*renovate:\\s*datasource=(?<datasource>git-refs)\\s+depName=(?<depName>\\S+)\\s+branch=(?<currentValue>\\S+)\\s*\\nARG\\s+\\S+=\"?(?<currentDigest>[0-9a-f]{7,40})\"?"
