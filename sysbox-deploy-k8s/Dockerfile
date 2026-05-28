@@ -20,7 +20,7 @@ ARG SYSBOX_REPO=https://github.com/nestybox/sysbox
 ARG SYSBOX_REF=v0.7.0
 ARG FUSE_REPO=https://github.com/Till0196/fuse
 ARG FUSE_REF=56767d330b8517fc2dd343a0beb0b4cd15f73650
-ARG GO_VERSION=1.25-trixie
+ARG GO_VERSION=1.26-trixie
 
 ############################################################
 # Stage 1: pkgr-src — checkout Till0196/sysbox-pkgr
