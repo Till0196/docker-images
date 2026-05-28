@@ -12,6 +12,7 @@ on:
 permissions:
   contents: read
   packages: write
+  pull-requests: read
 
 env:
   PUSH_IMAGE: ${{ github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch' }}
@@ -22,14 +23,23 @@ jobs:
     outputs:
       relevant: ${{ steps.filter.outputs.relevant }}
     steps:
-      - uses: actions/checkout@v6
       - id: filter
-        uses: dorny/paths-filter@v3
-        with:
-          filters: |
-            relevant:
-              - 'sharelatex/**'
-              - '.github/workflows/build-sharelatex-image.yml'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+            echo "relevant=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          files=$(gh api --paginate "repos/${REPO}/pulls/${PR}/files" --jq '.[].filename')
+          if printf '%s\n' "$files" | grep -qE '^(sharelatex/|\.github/workflows/build-sharelatex-image\.yml$)'; then
+            echo "relevant=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "relevant=false" >> "$GITHUB_OUTPUT"
+          fi
 
   BuildShareLatexImage:
     needs: changes
