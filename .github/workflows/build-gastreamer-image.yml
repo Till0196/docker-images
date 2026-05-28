@@ -63,7 +63,7 @@ jobs:
           images: ${{ env.REGISTRY_IMAGE }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
         id: setup-buildx
 
       - name: Login to GitHub Container Registry
@@ -103,8 +103,8 @@ jobs:
           platforms: ${{ matrix.platform }}
           labels: ${{ steps.meta.outputs.labels }}
           outputs: type=image,name=${{ env.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=true
-          cache-from: type=gha,scope=platform-${{ env.PLATFORM_PAIR }}
-          cache-to: type=gha,mode=max,scope=platform-${{ env.PLATFORM_PAIR }}
+          cache-from: type=gha,scope=gastreamer-${{ env.PLATFORM_PAIR }}
+          cache-to: type=gha,mode=max,scope=gastreamer-${{ env.PLATFORM_PAIR }}
 
       - name: Export digest
         run: |
@@ -113,7 +113,7 @@ jobs:
           touch "/tmp/digests/${digest#sha256:}"
 
       - name: Upload digest
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: digests-${{ env.PLATFORM_PAIR }}
           path: /tmp/digests/*
@@ -130,14 +130,14 @@ jobs:
           echo "REGISTRY_IMAGE=`echo ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }} | tr '[:upper:]' '[:lower:]'`" >> ${GITHUB_ENV}
 
       - name: Download digests
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: /tmp/digests
           pattern: digests-*
           merge-multiple: true
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Docker meta
         id: meta
@@ -165,4 +165,3 @@ jobs:
       - name: Inspect image
         run: |
           docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${{ steps.meta.outputs.version }}
-
