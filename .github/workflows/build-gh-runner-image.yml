@@ -3,7 +3,9 @@ run-name: build gh-runner image - ${{ github.event_name }}
 
 on:
   workflow_dispatch:
+  pull_request:
   push:
+    branches: [master]
     paths:
       - 'gh-runner/Dockerfile'
 
@@ -18,7 +20,23 @@ env:
   PUSH_IMAGE: ${{ github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch' }}
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      relevant: ${{ steps.filter.outputs.relevant }}
+    steps:
+      - uses: actions/checkout@v6
+      - id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            relevant:
+              - 'gh-runner/**'
+              - '.github/workflows/build-gh-runner-image.yml'
+
   push-image:
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true' || github.event_name != 'pull_request'
     strategy:
       fail-fast: false
       matrix:

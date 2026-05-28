@@ -3,7 +3,9 @@ run-name: build sysbox-deploy-k8s image - ${{ github.event_name }}
 
 on:
   workflow_dispatch:
+  pull_request:
   push:
+    branches: [master]
     paths:
       - 'sysbox-deploy-k8s/**'
       - '.github/workflows/build-sysbox-deploy-k8s-image.yml'
@@ -16,7 +18,23 @@ env:
   PUSH_IMAGE: ${{ github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch' }}
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      relevant: ${{ steps.filter.outputs.relevant }}
+    steps:
+      - uses: actions/checkout@v6
+      - id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            relevant:
+              - 'sysbox-deploy-k8s/**'
+              - '.github/workflows/build-sysbox-deploy-k8s-image.yml'
+
   BuildSysboxDeployK8sImage:
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true' || github.event_name != 'pull_request'
     strategy:
       fail-fast: false
       matrix:
