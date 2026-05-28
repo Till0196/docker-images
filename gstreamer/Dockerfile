@@ -10,9 +10,11 @@ ARG SCCACHE_ARCH=x86_64-unknown-linux-musl
 FROM build-${TARGETARCH} AS build
 
 # GStreamer プラグインのバージョン
+# renovate: datasource=git-tags depName=https://gitlab.freedesktop.org/gstreamer/gst-plugins-rs
 ARG GST_PLUGINS_RS_VERSION="0.14.2"
 
 # sccacheのバージョン
+# renovate: datasource=github-releases depName=mozilla/sccache
 ARG SCCACHE_VERSION="0.10.0"
 
 # 環境変数設定
@@ -60,9 +62,8 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 
 # sccacheをインストール
 RUN cd /tmp && \
-    curl -sSL $(curl -s https://api.github.com/repos/mozilla/sccache/releases/tags/v${SCCACHE_VERSION} | \
-    jq -r '.assets[] | select(.name | contains("'${SCCACHE_ARCH}'") and endswith(".tar.gz") and (endswith(".sha256") | not) and (contains("dist") | not)) | .browser_download_url') \
-    -o sccache-v${SCCACHE_VERSION}-${SCCACHE_ARCH}.tar.gz && \
+    curl -fsSL -o sccache-v${SCCACHE_VERSION}-${SCCACHE_ARCH}.tar.gz \
+        "https://github.com/mozilla/sccache/releases/download/v${SCCACHE_VERSION}/sccache-v${SCCACHE_VERSION}-${SCCACHE_ARCH}.tar.gz" && \
     tar -zxvf sccache-v${SCCACHE_VERSION}-${SCCACHE_ARCH}.tar.gz && \
     install sccache-v${SCCACHE_VERSION}-${SCCACHE_ARCH}/sccache /usr/local/bin && \
     rm -rf /tmp/sccache*

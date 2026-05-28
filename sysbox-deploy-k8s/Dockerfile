@@ -20,6 +20,7 @@ ARG SYSBOX_REPO=https://github.com/nestybox/sysbox
 ARG SYSBOX_REF=v0.7.0
 ARG FUSE_REPO=https://github.com/Till0196/fuse
 ARG FUSE_REF=56767d330b8517fc2dd343a0beb0b4cd15f73650
+# renovate: datasource=docker depName=golang versioning=docker
 ARG GO_VERSION=1.26-trixie
 
 ############################################################

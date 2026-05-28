@@ -52,6 +52,7 @@ RUN mkdir \
         /configs
 
 # Install Git Delta
+# renovate: datasource=github-releases depName=dandavison/delta
 ARG GIT_DELTA_VERSION=0.18.2
 
 RUN cd /tmp && \
@@ -62,9 +63,8 @@ RUN cd /tmp && \
     else \
         echo "Unsupported architecture: $TARGETARCH"; exit 1; \
     fi && \
-    curl -sSL $(curl -s https://api.github.com/repos/dandavison/delta/releases/tags/${GIT_DELTA_VERSION} | \
-            jq -r '.assets[] | select(.name | contains("'${GIT_DELTA_ARCH}'") and endswith(".deb")) | .browser_download_url' | head -n 1) \
-        -o git-delta_${GIT_DELTA_VERSION}_${GIT_DELTA_ARCH}.deb && \
+    curl -fsSL -o git-delta_${GIT_DELTA_VERSION}_${GIT_DELTA_ARCH}.deb \
+        "https://github.com/dandavison/delta/releases/download/${GIT_DELTA_VERSION}/git-delta_${GIT_DELTA_VERSION}_${GIT_DELTA_ARCH}.deb" && \
     dpkg -i git-delta_${GIT_DELTA_VERSION}_${GIT_DELTA_ARCH}.deb && \
     rm git-delta_${GIT_DELTA_VERSION}_${GIT_DELTA_ARCH}.deb
 
@@ -101,7 +101,8 @@ USER ${USERNAME}
 # Set the default shell to zsh rather than sh
 ENV SHELL=/bin/zsh
 
-# Default powerline10k theme
+# Default powerline10k theme (versioned via deluan/zsh-in-docker installer)
+# renovate: datasource=github-releases depName=deluan/zsh-in-docker
 ARG POWERLINE10K_VERSION=1.2.0
 
 RUN sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/v${POWERLINE10K_VERSION}/zsh-in-docker.sh)" -- \

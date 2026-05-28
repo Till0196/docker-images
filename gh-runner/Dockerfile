@@ -2,9 +2,13 @@ FROM mcr.microsoft.com/dotnet/runtime-deps:10.0-noble AS build
 
 ARG TARGETOS
 ARG TARGETARCH
+# renovate: datasource=github-releases depName=actions/runner
 ARG RUNNER_VERSION=2.331.0
+# renovate: datasource=github-releases depName=actions/runner-container-hooks
 ARG RUNNER_CONTAINER_HOOKS_VERSION=0.7.0
+# renovate: datasource=github-releases depName=moby/moby extractVersion=^docker-v(?<version>.+)$
 ARG DOCKER_VERSION=29.1.5
+# renovate: datasource=github-releases depName=docker/buildx
 ARG BUILDX_VERSION=0.31.0
 
 RUN apt update -y && apt install curl unzip -y
@@ -43,6 +47,7 @@ ENV ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT=1
 ENV ImageOS=ubuntu24
 
 ARG TARGETARCH
+# renovate: datasource=github-releases depName=cli/cli
 ARG GITHUB_CLI_VERSION=2.86.0
 
 # 'gpg-agent' and 'software-properties-common' are needed for the 'add-apt-repository' command that follows
