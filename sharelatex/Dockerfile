@@ -16,6 +16,16 @@ RUN echo "Set PATH to $PATH" && \
     NEW_TL_BIN=$(ls -d /usr/local/texlive/20*/bin/*/ | sort -V | tail -n1) && \
     "${NEW_TL_BIN}tlmgr" path add
 
+RUN TL_YEAR=$(ls -d /usr/local/texlive/20*/ | sed -E 's:.*/([0-9]{4})/$:\1:' | sort -V | tail -n1) && \
+    FINAL_URL="https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/${TL_YEAR}/tlnet-final" && \
+    echo "Detected TeX Live ${TL_YEAR}" && \
+    if curl -fsI "${FINAL_URL}/" >/dev/null 2>&1; then \
+        echo "Using frozen repository: ${FINAL_URL}" && \
+        tlmgr option repository "${FINAL_URL}"; \
+    else \
+        echo "tlnet-final for ${TL_YEAR} not found, keeping default repository"; \
+    fi
+
 # update tlmgr
 RUN tlmgr update --self
 
