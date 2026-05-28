@@ -125,3 +125,10 @@ COPY --from=pkgr-src /src/pkgr/k8s/scripts/sysbox-deploy-k8s.sh \
                      /opt/sysbox/scripts/sysbox-deploy-k8s.sh
 COPY --from=pkgr-src /src/pkgr/k8s/config/containerd-sysbox-dropin.toml \
                      /opt/sysbox/config/containerd-sysbox-dropin.toml
+
+# sysbox-deploy-k8s.sh reads $SYSBOX_VERSION to tag the installed-version marker
+# and to gate upgrade-vs-fresh-install logic. Upstream Dockerfile.sysbox-ce sets
+# this via --build-arg sysbox_version=v$(SYSBOX_CE_VER_FULL); we derive it from
+# SYSBOX_REF so Renovate-driven bumps stay in one place.
+ARG SYSBOX_REF
+ENV SYSBOX_VERSION=${SYSBOX_REF}
