@@ -64,7 +64,7 @@ RUN apt update -y \
 RUN apt update -y \
     && apt install -y --no-install-recommends autoconf automake dbus dnsutils dpkg dpkg-dev \
     fakeroot fonts-noto-color-emoji gnupg2 iproute2 iputils-ping libyaml-dev libtool libssl-dev \
-    locales mercurial openssh-client p7zip-rar pkg-config python-is-python3 rpm texinfo tk tree \
+    locales mercurial openssh-client 7zip-rar pkg-config python-is-python3 rpm texinfo tk tree \
     tzdata upx xvfb xz-utils zsync
 
 # Configure cmd_packages install

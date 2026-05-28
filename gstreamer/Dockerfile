@@ -34,7 +34,6 @@ RUN apt-get update && apt-get dist-upgrade -y && apt-get install -y \
     libgstreamer1.0-dev \
     libgstreamer-plugins-base1.0-dev \
     libgstreamer-plugins-bad1.0-dev \
-    libgstreamer-plugins-good1.0-dev \
     libgstrtspserver-1.0-dev \
     libges-1.0-dev \
     gstreamer1.0-tools \
@@ -46,7 +45,7 @@ RUN apt-get update && apt-get dist-upgrade -y && apt-get install -y \
     v4l-utils \
     libcairo2-dev \
     libpango1.0-dev \
-    libgdk-pixbuf2.0-dev \
+    libgdk-pixbuf-2.0-dev \
     libgtk-4-dev \
     libwebp-dev \
     libclang-dev \

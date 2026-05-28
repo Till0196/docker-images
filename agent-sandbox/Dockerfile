@@ -88,9 +88,9 @@ RUN mkdir -p /workspace /usr/local/share/npm-global && \
 
 # Set up fzf key bindings and completion scripts
 RUN FZF_VER=$(fzf --version | awk '{print $1}') && \
-    wget https://raw.githubusercontent.com/junegunn/fzf/${FZF_VER}/shell/key-bindings.zsh \
+    wget https://raw.githubusercontent.com/junegunn/fzf/v${FZF_VER}/shell/key-bindings.zsh \
         -O /usr/share/doc/fzf/examples/key-bindings.zsh && \
-    wget https://raw.githubusercontent.com/junegunn/fzf/${FZF_VER}/shell/completion.zsh \
+    wget https://raw.githubusercontent.com/junegunn/fzf/v${FZF_VER}/shell/completion.zsh \
         -O /usr/share/doc/fzf/examples/completion.zsh
 
 WORKDIR /workspace
