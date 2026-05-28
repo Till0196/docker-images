@@ -27,24 +27,30 @@
 		respond 204
 	}
 
-	handle /instance* {
-		header Access-Control-Allow-Origin "*"
-		root * {$AKKOMA_FRONTEND_ROOT:/akkoma/static/frontends/soapbox/main}
+	@instance path /instance*
+	header @instance Access-Control-Allow-Origin "*"
+
+	@frontend_file {
+		not path /
+		file {
+			root {$AKKOMA_FRONTEND_ROOT:{$AKKOMA_STATIC_DIR:/akkoma/static}/frontends/{$AKKOMA_FRONTEND_NAME:soapbox}/{$AKKOMA_FRONTEND_REF:main}}
+			try_files {path}
+		}
+	}
+	handle @frontend_file {
+		root * {$AKKOMA_FRONTEND_ROOT:{$AKKOMA_STATIC_DIR:/akkoma/static}/frontends/{$AKKOMA_FRONTEND_NAME:soapbox}/{$AKKOMA_FRONTEND_REF:main}}
 		file_server
 	}
 
-	handle /packs/* {
-		root * {$AKKOMA_FRONTEND_ROOT:/akkoma/static/frontends/soapbox/main}
-		file_server
+	@static_file {
+		not path /
+		file {
+			root {$AKKOMA_STATIC_DIR:/akkoma/static}
+			try_files {path}
+		}
 	}
-
-	handle /sw.js {
-		root * {$AKKOMA_FRONTEND_ROOT:/akkoma/static/frontends/soapbox/main}
-		file_server
-	}
-
-	handle /manifest.webmanifest {
-		root * {$AKKOMA_FRONTEND_ROOT:/akkoma/static/frontends/soapbox/main}
+	handle @static_file {
+		root * {$AKKOMA_STATIC_DIR:/akkoma/static}
 		file_server
 	}
 
@@ -52,20 +58,6 @@
 		root * {$AKKOMA_STATIC_DIR:/akkoma/static}
 		try_files /favicon.ico /favicon.png
 		file_server
-	}
-
-	handle /favicon.png {
-		root * {$AKKOMA_STATIC_DIR:/akkoma/static}
-		file_server
-	}
-
-	handle /logo.svg {
-		root * {$AKKOMA_STATIC_DIR:/akkoma/static}
-		file_server
-	}
-
-	handle /media/* {
-		reverse_proxy {$AKKOMA_UPSTREAM:127.0.0.1:4000}
 	}
 
 	reverse_proxy {$AKKOMA_UPSTREAM:127.0.0.1:4000} {

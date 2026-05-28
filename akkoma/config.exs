@@ -54,7 +54,10 @@ static_dir = env.("AKKOMA_STATIC_DIR", "/akkoma/static")
 uploads_dir = env.("AKKOMA_UPLOADS_DIR", "/akkoma/uploads")
 frontend_name = env.("AKKOMA_FRONTEND_NAME", "soapbox")
 frontend_ref = env.("AKKOMA_FRONTEND_REF", "main")
+frontend_git = env.("AKKOMA_FRONTEND_GIT", "https://gitlab.com/soapbox-pub/soapbox")
+frontend_bugtracker = env.("AKKOMA_FRONTEND_BUGTRACKER", "https://gitlab.com/soapbox-pub/soapbox/-/issues")
 frontend_build_url = env.("AKKOMA_FRONTEND_BUILD_URL", "https://gitlab.com/soapbox-pub/soapbox/-/jobs/artifacts/${ref}/raw/soapbox.zip?job=build")
+frontend_build_dir = env.("AKKOMA_FRONTEND_BUILD_DIR", "./")
 
 config :pleroma, Pleroma.Web.Endpoint,
   url: [
@@ -170,54 +173,19 @@ config :pleroma, :manifest,
     %{src: "/favicon.png", type: "image/png"}
   ]
 
+existing_frontends = Application.get_env(:pleroma, :frontends, [])
+existing_available = Keyword.get(existing_frontends, :available, %{})
+
 config :pleroma, :frontends,
   primary: %{"name" => frontend_name, "ref" => frontend_ref},
-  admin: %{"name" => "admin-fe", "ref" => "stable"},
-  mastodon: %{"name" => "mastodon-fe", "ref" => "akkoma"},
   pickable: ["#{frontend_name}/#{frontend_ref}"],
   swagger: %{"name" => "swagger-ui", "ref" => "stable", "enabled" => env_bool.("AKKOMA_SWAGGER_ENABLED", true)},
-  available: %{
-    "pleroma-fe" => %{
-      "name" => "pleroma-fe",
-      "git" => "https://akkoma.dev/AkkomaGang/pleroma-fe",
-      "build_url" => "https://akkoma-updates.s3-website.fr-par.scw.cloud/frontend/${ref}/akkoma-fe.zip",
-      "build_dir" => "dist",
-      "ref" => "stable"
-    },
-    "mastodon-fe" => %{
-      "name" => "mastodon-fe",
-      "git" => "https://akkoma.dev/AkkomaGang/masto-fe",
-      "build_url" => "https://akkoma-updates.s3-website.fr-par.scw.cloud/frontend/${ref}/masto-fe.zip",
-      "build_dir" => "distribution",
-      "ref" => "akkoma"
-    },
-    "fedibird-fe" => %{
-      "name" => "fedibird-fe",
-      "git" => "https://akkoma.dev/AkkomaGang/fedibird-fe",
-      "build_url" => "https://akkoma-updates.s3-website.fr-par.scw.cloud/frontend/${ref}/fedibird-fe.zip",
-      "build_dir" => "distribution",
-      "ref" => "akkoma"
-    },
-    "soapbox" => %{
-      "name" => "soapbox",
-      "git" => "https://gitlab.com/soapbox-pub/soapbox",
-      "bugtracker" => "https://gitlab.com/soapbox-pub/soapbox/-/issues",
-      "build_url" => frontend_build_url,
-      "build_dir" => "./",
-      "ref" => "main"
-    },
-    "admin-fe" => %{
-      "name" => "admin-fe",
-      "git" => "https://akkoma.dev/AkkomaGang/admin-fe",
-      "build_url" => "https://akkoma-updates.s3-website.fr-par.scw.cloud/frontend/${ref}/admin-fe.zip",
-      "build_dir" => "dist",
-      "ref" => "stable"
-    },
-    "swagger-ui" => %{
-      "name" => "swagger-ui",
-      "git" => "https://github.com/swagger-api/swagger-ui",
-      "build_url" => "https://akkoma-updates.s3-website.fr-par.scw.cloud/frontend/swagger-ui.zip",
-      "build_dir" => "dist",
-      "ref" => "stable"
-    }
-  }
+  available: Map.put(existing_available, frontend_name, %{
+    "name" => frontend_name,
+    "blind_trust" => true,
+    "git" => frontend_git,
+    "bugtracker" => frontend_bugtracker,
+    "build_url" => frontend_build_url,
+    "build_dir" => frontend_build_dir,
+    "ref" => frontend_ref
+  })

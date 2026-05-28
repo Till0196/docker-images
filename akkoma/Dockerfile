@@ -1,6 +1,7 @@
 FROM hexpm/elixir:1.19.5-erlang-28.5-alpine-3.23.4 AS otp
 ARG MIX_ENV="prod"
 ARG TMPDIR="/tmp/akkoma"
+# renovate: datasource=git-tags depName=https://akkoma.dev/AkkomaGang/akkoma versioning=semver
 ARG BUILD_TAG="v3.19.0"
 ARG PLEROMA_BUILD_BRANCH=${BUILD_TAG}
 ARG OAUTH_CONSUMER_STRATEGIES="oidc:ueberauth_oidcc"
@@ -20,9 +21,12 @@ RUN mix release --path $TMPDIR/release
 
 FROM alpine:3.23.4 AS soapbox-frontend
 ARG SOAPBOX_REF="main"
+# renovate: datasource=git-refs depName=https://gitlab.com/soapbox-pub/soapbox branch=main
+ARG SOAPBOX_COMMIT="5d01cf90a7a35cb50f24362d73f5425624332dce"
 ARG SOAPBOX_BUILD_URL=""
 RUN apk add --no-cache ca-certificates curl unzip
 RUN set -eux; \
+    echo "soapbox commit: ${SOAPBOX_COMMIT}"; \
     build_url="${SOAPBOX_BUILD_URL:-https://gitlab.com/soapbox-pub/soapbox/-/jobs/artifacts/${SOAPBOX_REF}/raw/soapbox.zip?job=build}"; \
     mkdir -p /static.dist/frontends/soapbox/${SOAPBOX_REF}; \
     curl -fsSL -o /tmp/soapbox.zip "${build_url}"; \
