@@ -103,7 +103,7 @@ ENV SHELL=/bin/zsh
 
 # Default powerline10k theme (versioned via deluan/zsh-in-docker installer)
 # renovate: datasource=github-releases depName=deluan/zsh-in-docker
-ARG POWERLINE10K_VERSION=1.2.0
+ARG POWERLINE10K_VERSION=1.2.1
 
 RUN sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/v${POWERLINE10K_VERSION}/zsh-in-docker.sh)" -- \
   -p git \
