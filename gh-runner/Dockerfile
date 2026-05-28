@@ -9,7 +9,7 @@ ARG RUNNER_CONTAINER_HOOKS_VERSION=0.8.1
 # renovate: datasource=github-releases depName=moby/moby extractVersion=^docker-v(?<version>.+)$
 ARG DOCKER_VERSION=29.1.5
 # renovate: datasource=github-releases depName=docker/buildx
-ARG BUILDX_VERSION=0.31.0
+ARG BUILDX_VERSION=0.34.1
 
 RUN apt update -y && apt install curl unzip -y
 
