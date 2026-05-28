@@ -121,6 +121,8 @@ RUN npm install -g \
     rm -rf /tmp/*
 
 # Install Codex CLI
+# renovate: datasource=github-releases depName=openai/codex extractVersion=^rust-v(?<version>\d+\.\d+\.\d+)$
+ARG CODEX_VERSION="0.134.0"
 RUN cd /tmp && \
     if [ "$TARGETARCH" = "arm64" ]; then \
         export CODEX_ARCH="aarch64"; \
@@ -129,9 +131,8 @@ RUN cd /tmp && \
     else \
         echo "Unsupported architecture: $TARGETARCH"; exit 1; \
     fi && \
-    curl -sSL $(curl -s https://api.github.com/repos/openai/codex/releases/latest | \
-            jq -r '.assets[] | select(.name | contains("'${CODEX_ARCH}'") and endswith("unknown-linux-musl.tar.gz") and (contains("codex-responses-api-proxy") | not)) | .browser_download_url') \
-        -o codex-${CODEX_ARCH}-unknown-linux-musl.tar.gz && \
+    curl -fsSL -o codex-${CODEX_ARCH}-unknown-linux-musl.tar.gz \
+        "https://github.com/openai/codex/releases/download/rust-v${CODEX_VERSION}/codex-${CODEX_ARCH}-unknown-linux-musl.tar.gz" && \
     sudo tar -zxvf codex-${CODEX_ARCH}-unknown-linux-musl.tar.gz -C /usr/local/bin && \
     sudo mv /usr/local/bin/codex-${CODEX_ARCH}-unknown-linux-musl /usr/local/bin/codex && \
     rm codex-${CODEX_ARCH}-unknown-linux-musl.tar.gz
