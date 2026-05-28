@@ -10,6 +10,20 @@
         "github-actions"
       ],
       "automerge": true
+    },
+    {
+      "description": "Auto-merge minor/patch updates for custom-regex-managed ARGs and Dockerfile base images once CI passes",
+      "matchManagers": [
+        "custom.regex",
+        "dockerfile"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest",
+        "pin"
+      ],
+      "automerge": true
     }
   ],
   "customManagers": [
