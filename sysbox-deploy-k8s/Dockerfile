@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.7
+# syntax=docker/dockerfile:1.24
 #
 # sysbox-deploy-k8s image built from Till0196 forks, assembled from a clean
 # centos7/systemd base + selective copies from the upstream Nestybox image.
