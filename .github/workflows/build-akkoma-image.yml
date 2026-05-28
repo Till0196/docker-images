@@ -49,7 +49,7 @@ jobs:
           password: ${{ github.token }}
 
       - name: Build and push by digest
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         id: build
         with:
           context: ./akkoma
