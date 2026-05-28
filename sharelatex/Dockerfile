@@ -1,7 +1,7 @@
 ARG TARGETARCH
 
 # x86_64の場合、DockerHubからベースイメージを利用
-FROM sharelatex/sharelatex:5 AS base-amd64
+FROM sharelatex/sharelatex:6 AS base-amd64
 
 # arm64の場合、DockerHubにarm64向けイメージが存在しないため事前にビルドしたベースイメージを利用
 FROM ghcr.io/till0196/sharelatex-arm64:latest AS base-arm64
@@ -11,9 +11,10 @@ FROM base-${TARGETARCH}
 
 COPY --from=registry.gitlab.com/islandoftex/images/texlive:latest /usr/local/texlive /usr/local/texlive
 
-# add tlmgr to PATH
+# add tlmgr to PATH (新しい方のTeX Liveを採用。ベースイメージに古い年度が同居している場合に備えて最新年度のtlmgrを選ぶ)
 RUN echo "Set PATH to $PATH" && \
-    $(find /usr/local/texlive -name tlmgr) path add
+    NEW_TL_BIN=$(ls -d /usr/local/texlive/20*/bin/*/ | sort -V | tail -n1) && \
+    "${NEW_TL_BIN}tlmgr" path add
 
 # update tlmgr
 RUN tlmgr update --self
