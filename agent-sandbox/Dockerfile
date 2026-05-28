@@ -86,12 +86,18 @@ RUN mkdir -p /workspace /usr/local/share/npm-global && \
         /workspace \
         /usr/local/share/npm-global
 
-# Set up fzf key bindings and completion scripts
+# Set up fzf key bindings and completion scripts.
+# fzf switched tag conventions mid-history: <=0.44 uses bare `0.44.1`,
+# >=0.45 uses `v0.45.0`. Try the `v`-prefixed form first, then fall back.
 RUN FZF_VER=$(fzf --version | awk '{print $1}') && \
-    wget https://raw.githubusercontent.com/junegunn/fzf/v${FZF_VER}/shell/key-bindings.zsh \
-        -O /usr/share/doc/fzf/examples/key-bindings.zsh && \
-    wget https://raw.githubusercontent.com/junegunn/fzf/v${FZF_VER}/shell/completion.zsh \
-        -O /usr/share/doc/fzf/examples/completion.zsh
+    for tag in "v${FZF_VER}" "${FZF_VER}"; do \
+        if wget -q "https://raw.githubusercontent.com/junegunn/fzf/${tag}/shell/key-bindings.zsh" \
+                -O /usr/share/doc/fzf/examples/key-bindings.zsh && \
+           wget -q "https://raw.githubusercontent.com/junegunn/fzf/${tag}/shell/completion.zsh" \
+                -O /usr/share/doc/fzf/examples/completion.zsh; then \
+            break; \
+        fi; \
+    done
 
 WORKDIR /workspace
 
