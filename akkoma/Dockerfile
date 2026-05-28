@@ -21,7 +21,7 @@ RUN mix deps.clean --all && mix clean
 RUN mix deps.get --only prod
 RUN mix release --path $TMPDIR/release
 
-FROM alpine:3.19 AS akkoma-basic-alpine
+FROM alpine:3.23 AS akkoma-basic-alpine
 ARG AKKOMADIR="/akkoma"
 ARG TMPDIR="/tmp/akkoma"
 COPY --from=otp ${TMPDIR}/release ${AKKOMADIR}
