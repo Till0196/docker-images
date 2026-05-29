@@ -108,6 +108,19 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
+  BuildAkkomaImageGate:
+    if: always()
+    needs: BuildAkkomaImage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check build result
+        run: |
+          result="${{ needs.BuildAkkomaImage.result }}"
+          if [ "$result" = "success" ] || [ "$result" = "skipped" ]; then
+            exit 0
+          fi
+          exit 1
+
   merge:
     if: github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
