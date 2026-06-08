@@ -3,7 +3,7 @@ FROM mcr.microsoft.com/dotnet/runtime-deps:10.0-noble AS build
 ARG TARGETOS
 ARG TARGETARCH
 # renovate: datasource=github-releases depName=actions/runner
-ARG RUNNER_VERSION=2.334.0
+ARG RUNNER_VERSION=2.335.0
 # renovate: datasource=github-releases depName=actions/runner-container-hooks
 ARG RUNNER_CONTAINER_HOOKS_VERSION=0.8.1
 # renovate: datasource=github-releases depName=moby/moby extractVersion=^docker-v(?<version>.+)$
