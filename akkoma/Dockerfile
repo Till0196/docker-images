@@ -1,4 +1,4 @@
-FROM hexpm/elixir:1.20.0-erlang-28.5-alpine-3.23.4 AS otp
+FROM hexpm/elixir:1.20.1-erlang-28.5-alpine-3.23.4 AS otp
 ARG MIX_ENV="prod"
 ARG TMPDIR="/tmp/akkoma"
 # renovate: datasource=git-tags depName=https://akkoma.dev/AkkomaGang/akkoma versioning=semver
