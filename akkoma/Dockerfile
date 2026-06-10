@@ -43,7 +43,7 @@ COPY --from=soapbox-frontend /static.dist ${AKKOMADIR}/static.dist
 # dependencies
 RUN apk add --no-cache caddy postgresql-client
 # optional dependencies
-RUN apk add --no-cache imagemagick ffmpeg exiftool libsoup libmagic
+RUN apk add --no-cache imagemagick ffmpeg exiftool libsoup3 libmagic
 
 WORKDIR ${AKKOMADIR}
 EXPOSE 4000 8080
