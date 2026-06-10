@@ -19,7 +19,7 @@ RUN mix deps.clean --all && mix clean
 RUN mix deps.get --only prod
 RUN mix release --path $TMPDIR/release
 
-FROM alpine:3.23.4 AS soapbox-frontend
+FROM alpine:3.24.0 AS soapbox-frontend
 ARG SOAPBOX_REF="main"
 # renovate: datasource=git-refs depName=https://gitlab.com/soapbox-pub/soapbox branch=main
 ARG SOAPBOX_COMMIT="5d01cf90a7a35cb50f24362d73f5425624332dce"
@@ -33,7 +33,7 @@ RUN set -eux; \
     unzip -q /tmp/soapbox.zip -d /static.dist/frontends/soapbox/${SOAPBOX_REF}; \
     rm /tmp/soapbox.zip
 
-FROM alpine:3.23.4 AS akkoma-basic-alpine
+FROM alpine:3.24.0 AS akkoma-basic-alpine
 ARG AKKOMADIR="/akkoma"
 ARG TMPDIR="/tmp/akkoma"
 ARG SOAPBOX_REF="main"
@@ -43,7 +43,7 @@ COPY --from=soapbox-frontend /static.dist ${AKKOMADIR}/static.dist
 # dependencies
 RUN apk add --no-cache caddy postgresql-client
 # optional dependencies
-RUN apk add --no-cache imagemagick ffmpeg exiftool libsoup libmagic
+RUN apk add --no-cache imagemagick ffmpeg exiftool libsoup3 libmagic
 
 WORKDIR ${AKKOMADIR}
 EXPOSE 4000 8080
