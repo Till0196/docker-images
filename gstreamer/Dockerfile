@@ -11,7 +11,7 @@ FROM build-${TARGETARCH} AS build
 
 # GStreamer プラグインのバージョン
 # renovate: datasource=git-tags depName=https://gitlab.freedesktop.org/gstreamer/gst-plugins-rs
-ARG GST_PLUGINS_RS_VERSION="0.15.2"
+ARG GST_PLUGINS_RS_VERSION="0.15.3"
 
 # sccacheのバージョン
 # renovate: datasource=github-releases depName=mozilla/sccache
