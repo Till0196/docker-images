@@ -48,7 +48,7 @@ ENV ImageOS=ubuntu24
 
 ARG TARGETARCH
 # renovate: datasource=github-releases depName=cli/cli
-ARG GITHUB_CLI_VERSION=2.95.0
+ARG GITHUB_CLI_VERSION=2.96.0
 
 # 'gpg-agent' and 'software-properties-common' are needed for the 'add-apt-repository' command that follows
 RUN apt update -y \
