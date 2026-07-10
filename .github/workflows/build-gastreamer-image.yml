@@ -110,7 +110,14 @@ jobs:
           path: |
             var-cache-cargo
             var-cache-sccache
-          key: ${{ env.IMAGE_NAME }}-cargo-cache-${{ env.PLATFORM_PAIR }}
+          # actions/cache のキーは不変(既存キーには上書き保存されない)。
+          # 固定キーだと初回保存時点の cargo/sccache で凍結され、Renovate の
+          # バージョン更新で増えた新クレートがキャッシュされなくなる。
+          # run_id を付けたローリングキーにし、restore-keys で直近スナップショットを
+          # 復元しつつ毎回更新版を保存する。
+          key: ${{ env.IMAGE_NAME }}-cargo-cache-${{ env.PLATFORM_PAIR }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ env.IMAGE_NAME }}-cargo-cache-${{ env.PLATFORM_PAIR }}-
 
       - name: inject cache into docker
         uses: reproducible-containers/buildkit-cache-dance@v3.4.0
@@ -121,6 +128,8 @@ jobs:
               "var-cache-sccache": "/var/cache/sccache"
             }
           builder: ${{ steps.setup-buildx.outputs.name }}
+          # ローリングキーのため primary key は毎回ミスし cache-hit は空になる。
+          # よって常に抽出・保存され、キャッシュが最新化される。
           skip-extraction: ${{ steps.cache.outputs.cache-hit }}
 
       - name: Build and push by digest
@@ -132,8 +141,13 @@ jobs:
           platforms: ${{ matrix.platform }}
           labels: ${{ steps.meta.outputs.labels }}
           outputs: type=image,name=${{ env.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=${{ env.PUSH_IMAGE }}
+          # mode=min: 最終イメージ層のみ gha にキャッシュする。
+          # mode=max は全中間層(巨大な Rust ビルド成果物含む)を書き込んで
+          # リポジトリの 10GB キャッシュ枠を食い潰し、cargo/sccache キャッシュを
+          # LRU で追い出していた。Rust の再ビルド高速化は下の actions/cache
+          # (cargo/sccache マウント)+ sccache に任せ、gha はイメージ層のみに絞る。
           cache-from: type=gha,scope=gastreamer-${{ env.PLATFORM_PAIR }}
-          cache-to: type=gha,mode=max,scope=gastreamer-${{ env.PLATFORM_PAIR }}
+          cache-to: type=gha,mode=min,scope=gastreamer-${{ env.PLATFORM_PAIR }}
 
       - name: Export digest
         if: env.PUSH_IMAGE == 'true'
