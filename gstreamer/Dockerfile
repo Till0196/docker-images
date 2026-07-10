@@ -51,10 +51,37 @@ RUN apt-get update && apt-get dist-upgrade -y && apt-get install -y \
     libgtk-4-dev \
     libwebp-dev \
     libclang-dev \
+    libjson-glib-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # NDI SDKをインストール
 RUN curl -fsSL https://raw.githubusercontent.com/DistroAV/DistroAV/refs/heads/master/CI/libndi-get.sh | bash
+
+# gstreamer-validate をソースからビルド
+# Ubuntu には gstreamer-validate-1.0 の開発パッケージが無いため、
+# システムの GStreamer と同じバージョンの gst-devtools を自前でビルドして供給する。
+# これが無いと gst-plugins-rs の utils/validate プラグインのビルドが失敗する。
+# gst-devtools は GStreamer モノレポの subprojects/gst-devtools に統合されているため、
+# GitLab のアーカイブAPIで該当サブディレクトリのみを取得する。
+ENV PKG_CONFIG_PATH="/usr/local/lib/pkgconfig"
+RUN GST_VERSION="$(pkg-config --modversion gstreamer-1.0)" && \
+    echo "Building gst-devtools (validate) ${GST_VERSION}" && \
+    mkdir -p /tmp/gst-devtools && cd /tmp/gst-devtools && \
+    curl -fsSL "https://gitlab.freedesktop.org/api/v4/projects/gstreamer%2Fgstreamer/repository/archive.tar.gz?sha=${GST_VERSION}&path=subprojects/gst-devtools" \
+        | tar -xz --strip-components=3 && \
+    meson setup builddir \
+        --prefix=/usr/local --libdir=lib \
+        -Dvalidate=enabled \
+        -Ddebug_viewer=disabled \
+        -Ddoc=disabled \
+        -Dtests=disabled \
+        -Dintrospection=disabled \
+        -Dnls=disabled && \
+    ninja -C builddir && \
+    ninja -C builddir install && \
+    ldconfig && \
+    cd / && rm -rf /tmp/gst-devtools && \
+    pkg-config --modversion gstreamer-validate-1.0
 
 # Rustをインストール
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
