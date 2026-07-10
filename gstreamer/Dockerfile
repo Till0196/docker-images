@@ -62,12 +62,12 @@ RUN curl -fsSL https://raw.githubusercontent.com/DistroAV/DistroAV/refs/heads/ma
 # システムの GStreamer と同じバージョンの gst-devtools を自前でビルドして供給する。
 # これが無いと gst-plugins-rs の utils/validate プラグインのビルドが失敗する。
 # gst-devtools は GStreamer モノレポの subprojects/gst-devtools に統合されているため、
-# GitLab のアーカイブAPIで該当サブディレクトリのみを取得する。
+# GitLab のアーカイブ(?path=)で該当サブディレクトリのみを取得する。
 ENV PKG_CONFIG_PATH="/usr/local/lib/pkgconfig"
 RUN GST_VERSION="$(pkg-config --modversion gstreamer-1.0)" && \
     echo "Building gst-devtools (validate) ${GST_VERSION}" && \
     mkdir -p /tmp/gst-devtools && cd /tmp/gst-devtools && \
-    curl -fsSL "https://gitlab.freedesktop.org/api/v4/projects/gstreamer%2Fgstreamer/repository/archive.tar.gz?sha=${GST_VERSION}&path=subprojects/gst-devtools" \
+    curl -fsSL "https://gitlab.freedesktop.org/gstreamer/gstreamer/-/archive/${GST_VERSION}/gstreamer-${GST_VERSION}.tar.gz?path=subprojects/gst-devtools" \
         | tar -xz --strip-components=3 && \
     meson setup builddir \
         --prefix=/usr/local --libdir=lib \
