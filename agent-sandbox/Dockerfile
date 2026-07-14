@@ -129,7 +129,7 @@ RUN npm install -g \
 
 # Install Codex CLI
 # renovate: datasource=github-releases depName=openai/codex extractVersion=^rust-v(?<version>\d+\.\d+\.\d+)$
-ARG CODEX_VERSION="0.144.3"
+ARG CODEX_VERSION="0.144.4"
 RUN cd /tmp && \
     if [ "$TARGETARCH" = "arm64" ]; then \
         export CODEX_ARCH="aarch64"; \
