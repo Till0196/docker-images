@@ -108,7 +108,8 @@ RUN userdel -r ubuntu && \
     echo "coder ALL=(ALL) NOPASSWD:ALL" >>/etc/sudoers.d/nopasswd
 
 USER coder
-RUN pipx ensurepath # adds user's bin directory to PATH
+
+ENV PATH="/home/coder/.local/bin:${PATH}"
 
 # renovate: datasource=github-releases depName=coder/code-server extractVersion=^v(?<version>.*)$
 ARG CODE_SERVER_VERSION=4.129.0
