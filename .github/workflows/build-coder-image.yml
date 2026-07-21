@@ -15,6 +15,8 @@ permissions:
   pull-requests: read
 
 env:
+  IMAGE_NAME: coder
+  TARGET_DIR: coder
   PUSH_IMAGE: ${{ github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch' }}
 
 jobs:
@@ -22,8 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       relevant: ${{ steps.filter.outputs.relevant }}
-      matrix_json: ${{ steps.variants.outputs.matrix_json }}
-      variants_json: ${{ steps.variants.outputs.variants_json }}
+      variants: ${{ steps.variants.outputs.variants }}
     steps:
       - id: filter
         env:
@@ -43,45 +44,43 @@ jobs:
             echo "relevant=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Checkout code
+        uses: actions/checkout@v7
+
       - id: variants
         run: |
           set -euo pipefail
           shopt -s nullglob
 
-          dockerfiles=(coder/*.Dockerfile)
-          if [ "${#dockerfiles[@]}" -eq 0 ]; then
-            echo "No Dockerfile variants found under coder/."
-            echo "variants_json=[]" >> "$GITHUB_OUTPUT"
-            echo "matrix_json=[]" >> "$GITHUB_OUTPUT"
+          names=()
+          for dockerfile in "${TARGET_DIR}"/*.Dockerfile; do
+            name=${dockerfile##*/}
+            names+=("${name%.Dockerfile}")
+          done
+
+          if [ "${#names[@]}" -eq 0 ]; then
+            echo "No Dockerfile variants found under ${TARGET_DIR}/."
+            echo "variants=[]" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          variants_json=$(printf '%s\n' "${dockerfiles[@]}" | jq -Rsc '
-            split("\n")[:-1]
-            | map({
-                dockerfile: ., 
-                variant: (split("/")[-1] | sub("\\.Dockerfile$"; ""))
-              })
-          ')
-
-          matrix_json=$(jq -cn \
-            --argjson variants "$variants_json" \
-            '[
-              $variants[] as $v |
-              { os: "ubuntu-latest", platform: "linux/amd64", dockerfile: $v.dockerfile, variant: $v.variant },
-              { os: "ubuntu-24.04-arm", platform: "linux/arm64", dockerfile: $v.dockerfile, variant: $v.variant }
-            ]')
-
-          echo "variants_json=${variants_json}" >> "$GITHUB_OUTPUT"
-          echo "matrix_json=${matrix_json}" >> "$GITHUB_OUTPUT"
+          printf 'Found variants: %s\n' "${names[*]}"
+          variants=$(printf '%s\n' "${names[@]}" | jq -Rsc 'split("\n")[:-1]')
+          echo "variants=${variants}" >> "$GITHUB_OUTPUT"
 
   BuildCoderImage:
     needs: discover
-    if: needs.discover.outputs.relevant == 'true' && needs.discover.outputs.matrix_json != '[]'
+    if: needs.discover.outputs.relevant == 'true' && needs.discover.outputs.variants != '[]'
     strategy:
       fail-fast: false
       matrix:
-        include: ${{ fromJson(needs.discover.outputs.matrix_json) }}
+        variant: ${{ fromJson(needs.discover.outputs.variants) }}
+        platform: [linux/amd64, linux/arm64]
+        include:
+          - platform: linux/amd64
+            os: ubuntu-latest
+          - platform: linux/arm64
+            os: ubuntu-24.04-arm
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -89,8 +88,7 @@ jobs:
         run: |
           platform=${{ matrix.platform }}
           echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
-          echo "VARIANT=${{ matrix.variant }}" >> $GITHUB_ENV
-          echo "REGISTRY_IMAGE=`echo ghcr.io/${{ github.repository_owner }}/coder | tr '[:upper:]' '[:lower:]'`" >> ${GITHUB_ENV}
+          echo "REGISTRY_IMAGE=`echo ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }} | tr '[:upper:]' '[:lower:]'`" >> ${GITHUB_ENV}
 
       - name: Checkout code
         uses: actions/checkout@v7
@@ -112,31 +110,31 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
-      - name: Build and push
+      - name: Build and push by digest
         id: build
         uses: docker/build-push-action@v7
         with:
-          context: ./coder
-          file: ${{ matrix.dockerfile }}
+          context: ${{ env.TARGET_DIR }}
+          file: ${{ env.TARGET_DIR }}/${{ matrix.variant }}.Dockerfile
           platforms: ${{ matrix.platform }}
           labels: ${{ steps.meta.outputs.labels }}
           outputs: type=image,name=${{ env.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=${{ env.PUSH_IMAGE }}
-          cache-from: type=gha,scope=coder-${{ env.VARIANT }}-${{ env.PLATFORM_PAIR }}
-          cache-to: type=gha,mode=max,scope=coder-${{ env.VARIANT }}-${{ env.PLATFORM_PAIR }}
+          cache-from: type=gha,scope=coder-${{ matrix.variant }}-${{ env.PLATFORM_PAIR }}
+          cache-to: type=gha,mode=max,scope=coder-${{ matrix.variant }}-${{ env.PLATFORM_PAIR }}
 
       - name: Export digest
         if: env.PUSH_IMAGE == 'true'
         run: |
           mkdir -p /tmp/digests
           digest="${{ steps.build.outputs.digest }}"
-          echo "${VARIANT} ${digest#sha256:}" > "/tmp/digests/${VARIANT}-${PLATFORM_PAIR}.txt"
+          touch "/tmp/digests/${digest#sha256:}"
 
       - name: Upload digest
         if: env.PUSH_IMAGE == 'true'
         uses: actions/upload-artifact@v7
         with:
-          name: digests-${{ env.VARIANT }}-${{ env.PLATFORM_PAIR }}
-          path: /tmp/digests/*.txt
+          name: digests-${{ matrix.variant }}-${{ env.PLATFORM_PAIR }}
+          path: /tmp/digests/*
           if-no-files-found: error
           retention-days: 1
 
@@ -154,21 +152,25 @@ jobs:
           exit 1
 
   merge:
-    if: (github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch') && needs.discover.outputs.variants_json != '[]'
+    if: (github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch') && needs.discover.outputs.variants != '[]'
     runs-on: ubuntu-latest
     needs:
       - discover
       - BuildCoderImage
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: ${{ fromJson(needs.discover.outputs.variants) }}
     steps:
       - name: Prepare
         run: |
-          echo "REGISTRY_IMAGE=`echo ghcr.io/${{ github.repository_owner }}/coder | tr '[:upper:]' '[:lower:]'`" >> ${GITHUB_ENV}
+          echo "REGISTRY_IMAGE=`echo ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }} | tr '[:upper:]' '[:lower:]'`" >> ${GITHUB_ENV}
 
       - name: Download digests
         uses: actions/download-artifact@v8
         with:
           path: /tmp/digests
-          pattern: digests-*
+          pattern: digests-${{ matrix.variant }}-*
           merge-multiple: true
 
       - name: Set up Docker Buildx
@@ -181,37 +183,12 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create manifest lists and push
-        env:
-          VARIANTS_JSON: ${{ needs.discover.outputs.variants_json }}
+      - name: Create manifest list and push
+        working-directory: /tmp/digests
         run: |
-          set -euo pipefail
+          docker buildx imagetools create -t "${REGISTRY_IMAGE}:${{ matrix.variant }}" \
+            $(printf "${REGISTRY_IMAGE}@sha256:%s " *)
 
-          mapfile -t variants < <(jq -r '.[].variant' <<< "$VARIANTS_JSON")
-          for variant in "${variants[@]}"; do
-            mapfile -t digests < <(awk -v v="$variant" '$1 == v { print $2 }' /tmp/digests/*.txt)
-            if [ "${#digests[@]}" -eq 0 ]; then
-              echo "No digests found for variant '$variant'"
-              exit 1
-            fi
-
-            refs=()
-            for digest in "${digests[@]}"; do
-              refs+=("${REGISTRY_IMAGE}@sha256:${digest}")
-            done
-
-            docker buildx imagetools create \
-              -t "${REGISTRY_IMAGE}:${variant}" \
-              "${refs[@]}"
-          done
-
-      - name: Inspect image tags
-        env:
-          VARIANTS_JSON: ${{ needs.discover.outputs.variants_json }}
+      - name: Inspect image
         run: |
-          set -euo pipefail
-
-          mapfile -t variants < <(jq -r '.[].variant' <<< "$VARIANTS_JSON")
-          for variant in "${variants[@]}"; do
-            docker buildx imagetools inspect "${REGISTRY_IMAGE}:${variant}"
-          done
+          docker buildx imagetools inspect "${REGISTRY_IMAGE}:${{ matrix.variant }}"
