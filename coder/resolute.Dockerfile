@@ -40,6 +40,7 @@ RUN apt-get update && apt-get dist-upgrade -y && apt-get install -y --no-install
     bash \
     zsh \
     fzf \
+    tmux \
     build-essential \
     containerd.io \
     curl \
