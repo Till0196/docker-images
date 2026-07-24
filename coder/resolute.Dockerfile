@@ -65,6 +65,8 @@ RUN apt-get update && apt-get dist-upgrade -y && apt-get install -y --no-install
     wget \
     rsync \
     iproute2 \
+    iputils-ping \
+    ripgrep \
     gh \
     nodejs && \
 # Install latest Git using their official PPA
