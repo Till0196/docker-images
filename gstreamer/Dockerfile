@@ -15,7 +15,7 @@ ARG GST_PLUGINS_RS_VERSION="0.15.3"
 
 # sccacheのバージョン
 # renovate: datasource=github-releases depName=mozilla/sccache
-ARG SCCACHE_VERSION="0.16.0"
+ARG SCCACHE_VERSION="0.17.0"
 
 # 環境変数設定
 ENV DEBIAN_FRONTEND=noninteractive
