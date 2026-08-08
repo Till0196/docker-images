@@ -2,7 +2,7 @@ FROM hexpm/elixir:1.20.1-erlang-28.5-alpine-3.23.4 AS otp
 ARG MIX_ENV="prod"
 ARG TMPDIR="/tmp/akkoma"
 # renovate: datasource=git-tags depName=https://akkoma.dev/AkkomaGang/akkoma versioning=semver
-ARG BUILD_TAG="v3.19.0"
+ARG BUILD_TAG="v3.20.0"
 ARG PLEROMA_BUILD_BRANCH=${BUILD_TAG}
 ARG OAUTH_CONSUMER_STRATEGIES="oidc:ueberauth_oidcc"
 # install dependencies
