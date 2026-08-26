@@ -66,6 +66,7 @@ RUN apt-get update && apt-get dist-upgrade -y && apt-get install -y --no-install
     rsync \
     iproute2 \
     iputils-ping \
+    poppler-utils \
     ripgrep \
     gh \
     nodejs && \
