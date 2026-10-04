@@ -22,7 +22,7 @@ RUN mix release --path $TMPDIR/release
 FROM alpine:3.24.2 AS soapbox-frontend
 ARG SOAPBOX_REF="main"
 # renovate: datasource=git-refs depName=https://gitlab.com/soapbox-pub/soapbox branch=main
-ARG SOAPBOX_COMMIT="041f9cdff91c4b634f930f759f76f6764bb4859b"
+ARG SOAPBOX_COMMIT="60ed6cd23ffb71cafb52e9a38a0e8abe41200f59"
 ARG SOAPBOX_BUILD_URL=""
 RUN apk add --no-cache ca-certificates curl unzip
 RUN set -eux; \
