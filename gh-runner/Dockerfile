@@ -7,7 +7,7 @@ ARG RUNNER_VERSION=2.338.0
 # renovate: datasource=github-releases depName=actions/runner-container-hooks
 ARG RUNNER_CONTAINER_HOOKS_VERSION=0.8.1
 # renovate: datasource=github-releases depName=moby/moby extractVersion=^docker-v(?<version>.+)$
-ARG DOCKER_VERSION=29.8.2
+ARG DOCKER_VERSION=29.9.0
 # renovate: datasource=github-releases depName=docker/buildx
 ARG BUILDX_VERSION=0.38.0
 
