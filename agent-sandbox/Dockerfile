@@ -53,7 +53,7 @@ RUN mkdir \
 
 # Install Git Delta
 # renovate: datasource=github-releases depName=dandavison/delta
-ARG GIT_DELTA_VERSION=0.21.2
+ARG GIT_DELTA_VERSION=0.22.0
 
 RUN cd /tmp && \
     if [ "$TARGETARCH" = "arm64" ]; then \
